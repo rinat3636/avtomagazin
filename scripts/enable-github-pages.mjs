@@ -1,8 +1,10 @@
 /**
- * Включает или обновляет GitHub Pages (ветка gh-pages, legacy).
+ * Включает или обновляет GitHub Pages (legacy: ветка + каталог).
  *
- * В CI: задайте repository secret PAGES_PAT и экспортируйте как GITHUB_TOKEN перед запуском
- * (см. .github/workflows/pages.yml). Интеграционный GITHUB_TOKEN POST /pages не вызывает.
+ * Цель по умолчанию: main + /docs (см. workflow). Переопределение:
+ * PAGES_SOURCE_BRANCH, PAGES_SOURCE_PATH (например gh-pages + /).
+ *
+ * В CI: secret PAGES_PAT → GITHUB_TOKEN (GITHUB_TOKEN workflow POST /pages не вызывает).
  * См.: https://github.com/actions/configure-pages/issues/40
  *
  * Локально: GITHUB_TOKEN=ghp_xxx npm run pages:enable (classic PAT с правом repo)
@@ -28,7 +30,10 @@ const baseHeaders = {
 }
 const jsonHeaders = { ...baseHeaders, 'Content-Type': 'application/json' }
 
-const target = { branch: 'gh-pages', path: '/' }
+const branch = process.env.PAGES_SOURCE_BRANCH || 'main'
+const pathRaw = process.env.PAGES_SOURCE_PATH || '/docs'
+const path = pathRaw.startsWith('/') ? pathRaw : `/${pathRaw}`
+const target = { branch, path }
 const bodyLegacy = JSON.stringify({
   build_type: 'legacy',
   source: target,
@@ -95,7 +100,7 @@ if (getRes.status === 404) {
   }
   console.error(postRes.status, postText)
   if (postRes.status === 422) {
-    console.error('Проверьте, что ветка gh-pages уже существует (первый деплой workflow).')
+    console.error('Проверьте, что источник уже существует (например ветка', target.branch, 'и каталог', target.path, ').')
   }
   process.exit(1)
 }
