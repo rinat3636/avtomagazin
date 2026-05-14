@@ -1,46 +1,101 @@
 /**
- * Включает GitHub Pages с публикацией из ветки gh-pages (после первого деплоя workflow).
- * Запуск: GITHUB_TOKEN=ghp_xxx node scripts/enable-github-pages.mjs
+ * Включает или обновляет GitHub Pages: публикация из ветки gh-pages, каталог /.
  *
- * Для режима «GitHub Actions» (артефакт) используйте отдельную настройку в UI репозитория.
+ * Локально: GITHUB_TOKEN=ghp_xxx npm run pages:enable
+ * В Actions: задаются GITHUB_TOKEN и (автоматически) GITHUB_REPOSITORY.
  */
-const owner = 'rinat3636'
-const repo = 'avtomagazin'
-const token = process.env.GITHUB_TOKEN
-if (!token) {
-  console.error('Укажите GITHUB_TOKEN (PAT с правом repo).')
+const repoFull = process.env.GITHUB_REPOSITORY || 'rinat3636/avtomagazin'
+const [owner, repo] = repoFull.split('/')
+if (!owner || !repo) {
+  console.error('Неверный GITHUB_REPOSITORY:', repoFull)
   process.exit(1)
 }
 
+const token = process.env.GITHUB_TOKEN
+if (!token) {
+  console.error('Укажите GITHUB_TOKEN (в Actions передаётся workflow).')
+  process.exit(1)
+}
+
+const api = `https://api.github.com/repos/${owner}/${repo}/pages`
 const headers = {
   Authorization: `Bearer ${token}`,
   Accept: 'application/vnd.github+json',
   'X-GitHub-Api-Version': '2022-11-28',
+  'Content-Type': 'application/json',
 }
 
-const get = await fetch(`https://api.github.com/repos/${owner}/${repo}/pages`, { headers })
-if (get.ok) {
-  const j = await get.json()
-  console.log('GitHub Pages уже настроен:', j.source?.branch ?? j.build_type)
-  process.exit(0)
-}
-
-// Ветка gh-pages должна существовать (после первого push из Actions).
-const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/pages`, {
-  method: 'POST',
-  headers: { ...headers, 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    source: { branch: 'gh-pages', path: '/' },
-  }),
+const target = { branch: 'gh-pages', path: '/' }
+const bodyLegacy = JSON.stringify({
+  build_type: 'legacy',
+  source: target,
 })
 
-const text = await res.text()
-if (!res.ok) {
-  console.error(res.status, text)
-  if (res.status === 404) {
-    console.error('Сначала дождитесь workflow «Deploy GitHub Pages» — он создаст ветку gh-pages.')
+async function getPages() {
+  const res = await fetch(api, { headers: { ...headers } })
+  const text = await res.text()
+  return { res, text }
+}
+
+async function putPages() {
+  const res = await fetch(api, { method: 'PUT', headers, body: bodyLegacy })
+  const text = await res.text()
+  return { res, text }
+}
+
+async function postPages() {
+  const res = await fetch(api, { method: 'POST', headers, body: bodyLegacy })
+  const text = await res.text()
+  return { res, text }
+}
+
+const { res: getRes, text: getText } = await getPages()
+
+if (getRes.ok) {
+  let data
+  try {
+    data = JSON.parse(getText)
+  } catch {
+    console.error('Не удалось разобрать ответ GET /pages')
+    process.exit(1)
+  }
+  const branch = data.source?.branch
+  const path = data.source?.path ?? '/'
+  if (branch === target.branch && path === target.path) {
+    console.log('GitHub Pages уже настроен:', branch, path)
+    process.exit(0)
+  }
+  console.log('Обновление источника Pages с', branch, path, '→', target.branch, target.path)
+  const { res: putRes, text: putText } = await putPages()
+  if (putRes.status === 204 || putRes.ok) {
+    console.log('GitHub Pages обновлён.')
+    process.exit(0)
+  }
+  console.error(putRes.status, putText)
+  process.exit(1)
+}
+
+if (getRes.status === 404) {
+  const { res: postRes, text: postText } = await postPages()
+  if (postRes.status === 201) {
+    console.log('GitHub Pages включён:', target.branch, target.path)
+    process.exit(0)
+  }
+  if (postRes.status === 409) {
+    const { res: putRes, text: putText } = await putPages()
+    if (putRes.status === 204 || putRes.ok) {
+      console.log('GitHub Pages обновлён (после 409 на POST).')
+      process.exit(0)
+    }
+    console.error(putRes.status, putText)
+    process.exit(1)
+  }
+  console.error(postRes.status, postText)
+  if (postRes.status === 422) {
+    console.error('Проверьте, что ветка gh-pages уже существует (первый деплой workflow).')
   }
   process.exit(1)
 }
-console.log('GitHub Pages включён: ветка gh-pages, каталог /')
-console.log(text)
+
+console.error(getRes.status, getText)
+process.exit(1)

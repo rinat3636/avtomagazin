@@ -1,5 +1,4 @@
-# Деплой: сборка и публикация в ветку gh-pages (без GitHub Actions Pages API).
-# После первого успешного запуска: Settings → Pages → Build: Deploy from branch → gh-pages → / (root).
+# Деплой: сборка → ветка gh-pages → через API включается Pages (legacy, branch gh-pages).
 name: Deploy GitHub Pages
 
 on:
@@ -9,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: pages
@@ -40,3 +40,18 @@ jobs:
           publish_branch: gh-pages
           publish_dir: ./dist
           force_orphan: true
+
+  enable-pages:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Включить Pages (ветка gh-pages)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/enable-github-pages.mjs
