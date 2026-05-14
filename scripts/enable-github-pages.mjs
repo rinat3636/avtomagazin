@@ -1,8 +1,10 @@
 /**
- * Включает или обновляет GitHub Pages: публикация из ветки gh-pages, каталог /.
+ * Включает или обновляет GitHub Pages (ветка gh-pages, legacy).
  *
- * Локально: GITHUB_TOKEN=ghp_xxx npm run pages:enable
- * В Actions: задаются GITHUB_TOKEN и (автоматически) GITHUB_REPOSITORY.
+ * Токен из GitHub Actions (GITHUB_TOKEN) НЕ может вызвать POST/PUT /pages — только PAT или UI.
+ * См.: https://github.com/actions/configure-pages/issues/40
+ *
+ * Локально: GITHUB_TOKEN=ghp_xxx npm run pages:enable (classic PAT с правом repo)
  */
 const repoFull = process.env.GITHUB_REPOSITORY || 'rinat3636/avtomagazin'
 const [owner, repo] = repoFull.split('/')

@@ -1,4 +1,6 @@
-# Деплой: сборка → ветка gh-pages → через API включается Pages (legacy, branch gh-pages).
+# Публикация через официальный Actions → Pages (артефакт + deploy-pages).
+# Важно: один раз вручную — Settings → Pages → Build and deployment → Source: GitHub Actions.
+# (Токен workflow не может включить Pages через REST API, см. github.com/actions/configure-pages/issues/40)
 name: Deploy GitHub Pages
 
 on:
@@ -7,15 +9,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
+  id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,25 +36,25 @@ jobs:
       - name: SPA fallback (роутер React)
         run: cp dist/index.html dist/404.html
 
-      - name: Publish to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./dist
-          force_orphan: true
+          path: dist
 
-  enable-pages:
-    needs: build-and-publish
+      - name: Памятка по первому деплою
+        run: |
+          {
+            echo '### GitHub Pages'
+            echo 'Если сайт по адресу `https://<user>.github.io/<repo>/` показывает «нет GitHub Pages», откройте репозиторий → **Settings** → **Pages** → **Build and deployment** → **Source: GitHub Actions**, сохраните и перезапустите workflow (**Actions** → этот workflow → **Run workflow**).'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Включить Pages (ветка gh-pages)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/enable-github-pages.mjs
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
