@@ -1,8 +1,8 @@
-# Сборка → (1) слияние dist в корень main — если в Pages выбрано «main /», сайт заработает без смены ветки.
-#    Коммит деплоя с [skip ci], чтобы не зациклить workflow.
-# (2) ветка gh-pages — если в Pages выбрано «gh-pages /».
+# Сборка → (1) rsync dist в корень main + git push (для Pages «main /»).
+#    Коммиты с меткой [deploy-bot] не запускают этот workflow (см. if у job).
+# (2) ветка gh-pages — для Pages «gh-pages /».
 #
-# PAT PAGES_PAT (опционально): выставляет источник main / через API.
+# PAT PAGES_PAT: выставляет источник main / через API (опционально).
 name: Deploy GitHub Pages
 
 on:
@@ -19,9 +19,13 @@ concurrency:
 
 jobs:
   build-and-publish:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.head_commit && !contains(github.event.head_commit.message, '[deploy-bot]')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
 
       - uses: actions/setup-node@v4
         with:
@@ -39,14 +43,21 @@ jobs:
       - name: Отключить Jekyll
         run: touch dist/.nojekyll
 
-      - name: Слить dist в корень main (Pages «main /»)
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: main
-          folder: dist
-          clean: false
-          commit-message: chore(deploy): static site [skip ci]
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Слить dist в корень main и запушить
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rsync -a dist/ ./
+          git add -f index.html 404.html .nojekyll assets/
+          if [ -f favicon.svg ]; then git add -f favicon.svg; fi
+          if [ -f icons.svg ]; then git add -f icons.svg; fi
+          if git diff --staged --quiet; then
+            echo "нет изменений статики — пропускаем коммит в main"
+          else
+            git commit -m "chore(deploy): static site [deploy-bot]"
+            git push origin HEAD:main
+          fi
 
       - name: Publish to gh-pages
         uses: peaceiris/actions-gh-pages@v4
@@ -71,7 +82,7 @@ jobs:
           PAGES_PAT: ${{ secrets.PAGES_PAT }}
         run: |
           if [ -z "${PAGES_PAT:-}" ]; then
-            echo "::notice::Без PAGES_PAT: при 404 откройте Settings → Pages и выберите main / (root) или gh-pages /."
+            echo "::notice::Без PAGES_PAT: Settings → Pages → main / (root) или gh-pages /."
             exit 0
           fi
           export GITHUB_TOKEN="$PAGES_PAT"
@@ -94,5 +105,5 @@ jobs:
             fi
             sleep 15
           done
-          echo "::warning::Корень сайта не 200 или нет #app. Включите Pages или добавьте PAGES_PAT."
+          echo "::warning::Корень сайта не 200 или нет #app."
           exit 1
