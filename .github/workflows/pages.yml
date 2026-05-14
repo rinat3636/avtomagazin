@@ -1,5 +1,8 @@
 # Сборка → ветка gh-pages → (опционально) включение Pages через REST API с PAT из secrets.
 #
+# Белый экран: в Settings → Pages часто ошибочно выбрана ветка main. Нужна ветка gh-pages.
+# В корне репозитория нет index.html (Vite: папка web/) — при публикации с main не отдаётся dev-шаблон.
+#
 # 1. Settings → Secrets and variables → Actions → New repository secret
 #    Name: PAGES_PAT
 #    Value: новый classic PAT с scope «repo» (или fine-grained: Pages + Administration на репо).

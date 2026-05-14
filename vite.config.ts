@@ -6,6 +6,12 @@ const repo = 'avtomagazin'
 const base = process.env.GITHUB_ACTIONS === 'true' ? `/${repo}/` : '/'
 
 export default defineConfig({
+  root: 'web',
+  publicDir: '../public',
   base,
   plugins: [react()],
+  build: {
+    outDir: '../dist',
+    emptyOutDir: true,
+  },
 })
