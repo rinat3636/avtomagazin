@@ -1,5 +1,5 @@
-# Деплой на GitHub Pages при push в main (бесплатный хостинг от GitHub).
-# Включите один раз: репозиторий → Settings → Pages → Build: GitHub Actions.
+# Деплой: сборка и публикация в ветку gh-pages (без GitHub Actions Pages API).
+# После первого успешного запуска: Settings → Pages → Build: Deploy from branch → gh-pages → / (root).
 name: Deploy GitHub Pages
 
 on:
@@ -8,16 +8,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,20 +30,13 @@ jobs:
           npm ci
           npm run build
 
-      # GitHub Pages отдаёт 404.html при несуществующем пути — нужно для SPA-роутера.
-      - name: SPA fallback
+      - name: SPA fallback (роутер React)
         run: cp dist/index.html dist/404.html
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - id: deploy
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          force_orphan: true
