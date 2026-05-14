@@ -1,7 +1,8 @@
 /**
  * Включает или обновляет GitHub Pages (ветка gh-pages, legacy).
  *
- * Токен из GitHub Actions (GITHUB_TOKEN) НЕ может вызвать POST/PUT /pages — только PAT или UI.
+ * В CI: задайте repository secret PAGES_PAT и экспортируйте как GITHUB_TOKEN перед запуском
+ * (см. .github/workflows/pages.yml). Интеграционный GITHUB_TOKEN POST /pages не вызывает.
  * См.: https://github.com/actions/configure-pages/issues/40
  *
  * Локально: GITHUB_TOKEN=ghp_xxx npm run pages:enable (classic PAT с правом repo)
@@ -20,12 +21,12 @@ if (!token) {
 }
 
 const api = `https://api.github.com/repos/${owner}/${repo}/pages`
-const headers = {
+const baseHeaders = {
   Authorization: `Bearer ${token}`,
   Accept: 'application/vnd.github+json',
   'X-GitHub-Api-Version': '2022-11-28',
-  'Content-Type': 'application/json',
 }
+const jsonHeaders = { ...baseHeaders, 'Content-Type': 'application/json' }
 
 const target = { branch: 'gh-pages', path: '/' }
 const bodyLegacy = JSON.stringify({
@@ -34,19 +35,19 @@ const bodyLegacy = JSON.stringify({
 })
 
 async function getPages() {
-  const res = await fetch(api, { headers: { ...headers } })
+  const res = await fetch(api, { headers: baseHeaders })
   const text = await res.text()
   return { res, text }
 }
 
 async function putPages() {
-  const res = await fetch(api, { method: 'PUT', headers, body: bodyLegacy })
+  const res = await fetch(api, { method: 'PUT', headers: jsonHeaders, body: bodyLegacy })
   const text = await res.text()
   return { res, text }
 }
 
 async function postPages() {
-  const res = await fetch(api, { method: 'POST', headers, body: bodyLegacy })
+  const res = await fetch(api, { method: 'POST', headers: jsonHeaders, body: bodyLegacy })
   const text = await res.text()
   return { res, text }
 }

@@ -1,11 +1,12 @@
-# Сборка и публикация в ветку gh-pages.
+# Сборка → ветка gh-pages → (опционально) включение Pages через REST API с PAT из secrets.
 #
-# Один раз вручную (иначе будет 404 «нет GitHub Pages»):
-# репозиторий → Settings → Pages → Build and deployment
-# → Source: Deploy from a branch → Branch: gh-pages → Folder: / (root) → Save.
+# 1. Settings → Secrets and variables → Actions → New repository secret
+#    Name: PAGES_PAT
+#    Value: новый classic PAT с scope «repo» (или fine-grained: Pages + Administration на репо).
+#    Не вставляйте токен в код и не в чат.
+# 2. После push workflow сам выставит Source: gh-pages / / через API.
 #
-# Режим «GitHub Actions» + deploy-pages у вас падал: Pages в настройках не был
-# переключён на Actions (см. лог job «Deploy to GitHub Pages»).
+# GITHUB_TOKEN не может вызвать POST /pages — см. github.com/actions/configure-pages/issues/40
 name: Deploy GitHub Pages
 
 on:
@@ -47,10 +48,23 @@ jobs:
           publish_dir: ./dist
           force_orphan: true
 
-      - name: Напоминание про Settings → Pages
-        if: success()
+  configure-pages:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Включить Pages (REST API, PAT из secrets)
+        env:
+          PAGES_PAT: ${{ secrets.PAGES_PAT }}
         run: |
-          {
-            echo '### GitHub Pages'
-            echo 'Если сайт **https://rinat3636.github.io/avtomagazin/** показывает, что Pages нет: **Settings** → **Pages** → источник **Deploy from a branch** → ветка **gh-pages** → папка **/** (root). Сохранить.'
-          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "${PAGES_PAT:-}" ]; then
+            echo "::notice title=PAGES_PAT::Добавьте repository secret PAGES_PAT (PAT с правом repo / Pages+Admin), затем перезапустите workflow."
+            exit 0
+          fi
+          export GITHUB_TOKEN="$PAGES_PAT"
+          node scripts/enable-github-pages.mjs
