@@ -1,17 +1,13 @@
-# Сборка → папка docs/ на ветке main → (опционально) включение Pages через REST API (PAT в secret PAGES_PAT).
-# GitHub Pages: Settings → Pages → Source «Deploy from a branch» → Branch: main → Folder: /docs.
+# Сборка → ветка gh-pages (корень сайта). В Settings → Pages: Branch gh-pages, folder / (root).
+# Не «main /» — иначе корень без index.html (404). Папка docs/ в репозитории не используется для Pages.
 #
-# pushes только в docs/ не запускают workflow (избегаем цикла от деплой-бота).
-# .nojekyll отключает Jekyll (иначе Vite-ассеты могут ломаться).
-#
-# GITHUB_TOKEN не может вызвать POST /pages — см. github.com/actions/configure-pages/issues/40
+# Опционально: secret PAGES_PAT — скрипт выставит источник gh-pages / через API.
+# GITHUB_TOKEN POST /pages не вызывает — см. github.com/actions/configure-pages/issues/40
 name: Deploy GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -22,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-publish-docs:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,20 +36,19 @@ jobs:
       - name: SPA fallback (роутер React)
         run: cp dist/index.html dist/404.html
 
-      - name: Отключить Jekyll на Pages
+      - name: Отключить Jekyll
         run: touch dist/.nojekyll
 
-      - name: Опубликовать в main/docs
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          branch: main
-          folder: dist
-          target-folder: docs
-          clean: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          force_orphan: true
 
   configure-pages:
-    needs: build-and-publish-docs
+    needs: build-and-publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,14 +57,14 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Включить Pages (REST API, PAT из secrets)
+      - name: Включить Pages (REST API, PAT)
         env:
           PAGES_PAT: ${{ secrets.PAGES_PAT }}
-          PAGES_SOURCE_BRANCH: main
-          PAGES_SOURCE_PATH: /docs
+          PAGES_SOURCE_BRANCH: gh-pages
+          PAGES_SOURCE_PATH: /
         run: |
           if [ -z "${PAGES_PAT:-}" ]; then
-            echo "::notice title=PAGES_PAT::Без secret PAGES_PAT включите Pages вручную: main + /docs."
+            echo "::notice::Без PAGES_PAT: Settings → Pages → Branch gh-pages, folder / (root)."
             exit 0
           fi
           export GITHUB_TOKEN="$PAGES_PAT"

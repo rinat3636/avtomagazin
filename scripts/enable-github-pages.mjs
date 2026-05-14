@@ -1,8 +1,7 @@
 /**
  * Включает или обновляет GitHub Pages (legacy: ветка + каталог).
  *
- * Цель по умолчанию: main + /docs (см. workflow). Переопределение:
- * PAGES_SOURCE_BRANCH, PAGES_SOURCE_PATH (например gh-pages + /).
+ * По умолчанию: gh-pages + /. Переопределение: PAGES_SOURCE_BRANCH, PAGES_SOURCE_PATH.
  *
  * В CI: secret PAGES_PAT → GITHUB_TOKEN (GITHUB_TOKEN workflow POST /pages не вызывает).
  * См.: https://github.com/actions/configure-pages/issues/40
@@ -30,8 +29,8 @@ const baseHeaders = {
 }
 const jsonHeaders = { ...baseHeaders, 'Content-Type': 'application/json' }
 
-const branch = process.env.PAGES_SOURCE_BRANCH || 'main'
-const pathRaw = process.env.PAGES_SOURCE_PATH || '/docs'
+const branch = process.env.PAGES_SOURCE_BRANCH || 'gh-pages'
+const pathRaw = process.env.PAGES_SOURCE_PATH || '/'
 const path = pathRaw.startsWith('/') ? pathRaw : `/${pathRaw}`
 const target = { branch, path }
 const bodyLegacy = JSON.stringify({
