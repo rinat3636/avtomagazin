@@ -1,13 +1,17 @@
-# Сборка → ветка gh-pages (корень сайта). В Settings → Pages: Branch gh-pages, folder / (root).
-# Не «main /» — иначе корень без index.html (404). Папка docs/ в репозитории не используется для Pages.
+# Сборка → две копии статики (на любой из типичных настроек Pages):
+#  A) ветка gh-pages, папка /     — Settings: Branch gh-pages, folder / (root)
+#  B) ветка main, папка /docs     — Settings: Branch main, folder /docs
 #
-# Опционально: secret PAGES_PAT — скрипт выставит источник gh-pages / через API.
-# GITHUB_TOKEN POST /pages не вызывает — см. github.com/actions/configure-pages/issues/40
+# Коммиты, которые меняют только docs/, не перезапускают workflow (без цикла).
+#
+# Включить источник через API может только PAT: secret PAGES_PAT (см. configure-pages).
 name: Deploy GitHub Pages
 
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -47,6 +51,15 @@ jobs:
           publish_dir: ./dist
           force_orphan: true
 
+      - name: Publish to main/docs
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: main
+          folder: dist
+          target-folder: docs
+          clean: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   configure-pages:
     needs: build-and-publish
     runs-on: ubuntu-latest
@@ -57,15 +70,36 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Включить Pages (REST API, PAT)
+      - name: Включить Pages через API (PAT)
         env:
           PAGES_PAT: ${{ secrets.PAGES_PAT }}
-          PAGES_SOURCE_BRANCH: gh-pages
-          PAGES_SOURCE_PATH: /
         run: |
           if [ -z "${PAGES_PAT:-}" ]; then
-            echo "::notice::Без PAGES_PAT: Settings → Pages → Branch gh-pages, folder / (root)."
+            echo "::notice::Добавьте PAGES_PAT или вручную: Pages → gh-pages / ИЛИ main + /docs."
             exit 0
           fi
           export GITHUB_TOKEN="$PAGES_PAT"
-          node scripts/enable-github-pages.mjs
+          echo "Пробуем источник main /docs"
+          PAGES_SOURCE_BRANCH=main PAGES_SOURCE_PATH=/docs node scripts/enable-github-pages.mjs || true
+          echo "Пробуем источник gh-pages / (итоговый приоритет)"
+          PAGES_SOURCE_BRANCH=gh-pages PAGES_SOURCE_PATH=/ node scripts/enable-github-pages.mjs || true
+
+  verify-live:
+    needs: build-and-publish
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ждём CDN и проверяем корень сайта
+        run: |
+          URL="https://rinat3636.github.io/avtomagazin/"
+          for i in $(seq 1 24); do
+            code=$(curl -sS -o /tmp/ghp_body -w "%{http_code}" "$URL" || true)
+            echo "attempt $i: HTTP $code"
+            if [ "$code" = "200" ] && grep -q 'id="app"' /tmp/ghp_body; then
+              echo "OK: отдаётся собранное приложение"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::warning::Корень сайта не 200 или нет #app. Настройте Pages (gh-pages / или main /docs) или PAGES_PAT."
+          exit 1
