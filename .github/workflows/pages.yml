@@ -1,17 +1,13 @@
-# Сборка → две копии статики (на любой из типичных настроек Pages):
-#  A) ветка gh-pages, папка /     — Settings: Branch gh-pages, folder / (root)
-#  B) ветка main, папка /docs     — Settings: Branch main, folder /docs
+# Сборка → (1) слияние dist в корень main — если в Pages выбрано «main /», сайт заработает без смены ветки.
+#    Коммит деплоя с [skip ci], чтобы не зациклить workflow.
+# (2) ветка gh-pages — если в Pages выбрано «gh-pages /».
 #
-# Коммиты, которые меняют только docs/, не перезапускают workflow (без цикла).
-#
-# Включить источник через API может только PAT: secret PAGES_PAT (см. configure-pages).
+# PAT PAGES_PAT (опционально): выставляет источник main / через API.
 name: Deploy GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -43,6 +39,15 @@ jobs:
       - name: Отключить Jekyll
         run: touch dist/.nojekyll
 
+      - name: Слить dist в корень main (Pages «main /»)
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: main
+          folder: dist
+          clean: false
+          commit-message: chore(deploy): static site [skip ci]
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -50,15 +55,6 @@ jobs:
           publish_branch: gh-pages
           publish_dir: ./dist
           force_orphan: true
-
-      - name: Publish to main/docs
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: main
-          folder: dist
-          target-folder: docs
-          clean: true
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   configure-pages:
     needs: build-and-publish
@@ -70,19 +66,16 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Включить Pages через API (PAT)
+      - name: Включить Pages через API (PAT → main /)
         env:
           PAGES_PAT: ${{ secrets.PAGES_PAT }}
         run: |
           if [ -z "${PAGES_PAT:-}" ]; then
-            echo "::notice::Добавьте PAGES_PAT или вручную: Pages → gh-pages / ИЛИ main + /docs."
+            echo "::notice::Без PAGES_PAT: при 404 откройте Settings → Pages и выберите main / (root) или gh-pages /."
             exit 0
           fi
           export GITHUB_TOKEN="$PAGES_PAT"
-          echo "Пробуем источник main /docs"
-          PAGES_SOURCE_BRANCH=main PAGES_SOURCE_PATH=/docs node scripts/enable-github-pages.mjs || true
-          echo "Пробуем источник gh-pages / (итоговый приоритет)"
-          PAGES_SOURCE_BRANCH=gh-pages PAGES_SOURCE_PATH=/ node scripts/enable-github-pages.mjs || true
+          PAGES_SOURCE_BRANCH=main PAGES_SOURCE_PATH=/ node scripts/enable-github-pages.mjs
 
   verify-live:
     needs: build-and-publish
@@ -92,7 +85,7 @@ jobs:
       - name: Ждём CDN и проверяем корень сайта
         run: |
           URL="https://rinat3636.github.io/avtomagazin/"
-          for i in $(seq 1 24); do
+          for i in $(seq 1 20); do
             code=$(curl -sS -o /tmp/ghp_body -w "%{http_code}" "$URL" || true)
             echo "attempt $i: HTTP $code"
             if [ "$code" = "200" ] && grep -q 'id="app"' /tmp/ghp_body; then
@@ -101,5 +94,5 @@ jobs:
             fi
             sleep 15
           done
-          echo "::warning::Корень сайта не 200 или нет #app. Настройте Pages (gh-pages / или main /docs) или PAGES_PAT."
+          echo "::warning::Корень сайта не 200 или нет #app. Включите Pages или добавьте PAGES_PAT."
           exit 1
