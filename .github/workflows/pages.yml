@@ -1,6 +1,11 @@
-# Публикация через официальный Actions → Pages (артефакт + deploy-pages).
-# Важно: один раз вручную — Settings → Pages → Build and deployment → Source: GitHub Actions.
-# (Токен workflow не может включить Pages через REST API, см. github.com/actions/configure-pages/issues/40)
+# Сборка и публикация в ветку gh-pages.
+#
+# Один раз вручную (иначе будет 404 «нет GitHub Pages»):
+# репозиторий → Settings → Pages → Build and deployment
+# → Source: Deploy from a branch → Branch: gh-pages → Folder: / (root) → Save.
+#
+# Режим «GitHub Actions» + deploy-pages у вас падал: Pages в настройках не был
+# переключён на Actions (см. лог job «Deploy to GitHub Pages»).
 name: Deploy GitHub Pages
 
 on:
@@ -9,16 +14,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,25 +39,18 @@ jobs:
       - name: SPA fallback (роутер React)
         run: cp dist/index.html dist/404.html
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
+          force_orphan: true
 
-      - name: Памятка по первому деплою
+      - name: Напоминание про Settings → Pages
+        if: success()
         run: |
           {
             echo '### GitHub Pages'
-            echo 'Если сайт по адресу `https://<user>.github.io/<repo>/` показывает «нет GitHub Pages», откройте репозиторий → **Settings** → **Pages** → **Build and deployment** → **Source: GitHub Actions**, сохраните и перезапустите workflow (**Actions** → этот workflow → **Run workflow**).'
+            echo 'Если сайт **https://rinat3636.github.io/avtomagazin/** показывает, что Pages нет: **Settings** → **Pages** → источник **Deploy from a branch** → ветка **gh-pages** → папка **/** (root). Сохранить.'
           } >> "$GITHUB_STEP_SUMMARY"
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
