@@ -4,10 +4,11 @@ import type { Vehicle } from '../types'
 import { useGarage } from '../context/GarageContext'
 import { useToast } from '../context/ToastContext'
 import { garagePageCopy } from '../content/siteCopy'
-import { VEHICLE_BRANDS, vehicleModelHintsForBrand } from '../data/vehicleHints'
+import { VEHICLE_BRANDS, vehicleModelHintsForBrand, ENGINE_HINTS } from '../data/vehicleHints'
 
 const BRAND_LIST_ID = 'garage-datalist-brand'
 const MODEL_LIST_ID = 'garage-datalist-model'
+const ENGINE_LIST_ID = 'garage-datalist-engine'
 
 export function GaragePage() {
   const { vehicle, setVehicle } = useGarage()
@@ -62,6 +63,11 @@ export function GaragePage() {
               <option key={m} value={m} />
             ))}
           </datalist>
+          <datalist id={ENGINE_LIST_ID}>
+            {ENGINE_HINTS.map((e) => (
+              <option key={e} value={e} />
+            ))}
+          </datalist>
           <div className="form-grid">
             <label className="field-label">
               {garagePageCopy.labelBrand}
@@ -106,6 +112,8 @@ export function GaragePage() {
                 value={form.engine}
                 onChange={(e) => setForm((f) => ({ ...f, engine: e.target.value }))}
                 placeholder={garagePageCopy.phEngine}
+                list={ENGINE_LIST_ID}
+                autoComplete="off"
               />
             </label>
             <label className="field-label field-label--full">
