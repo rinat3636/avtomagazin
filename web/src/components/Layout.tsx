@@ -82,15 +82,20 @@ export function Layout() {
           </form>
 
           <div className="topbar__actions">
-            <Link to="/garage" className="garage-pill garage-pill--on-dark" title={label}>
+            <Link
+              to="/garage"
+              className="garage-pill garage-pill--on-dark"
+              title={label}
+              aria-label={vehicle ? label : 'Моё авто'}
+            >
               <IconCar className="icon" />
               <span className="garage-pill__text">
                 {vehicle ? `${vehicle.brand} ${vehicle.model}` : 'Моё авто'}
               </span>
             </Link>
-            <Link to="/cart" className="btn btn--cart cart-btn">
+            <Link to="/cart" className="btn btn--cart cart-btn" aria-label="Корзина">
               <IconCart />
-              <span>Корзина</span>
+              <span className="cart-btn__label">Корзина</span>
               {totalQty > 0 ? <span className="cart-badge">{totalQty > 99 ? '99+' : totalQty}</span> : null}
             </Link>
           </div>
