@@ -136,8 +136,22 @@ button {
   border-bottom: 1px solid var(--header-border);
 }
 
+.topbar--bare {
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+}
+
 .topbar--store {
   backdrop-filter: none;
+}
+
+.topbar__inner--bare {
+  justify-content: flex-start;
+}
+
+.topbar__inner--bare .topbar__actions {
+  margin-left: auto;
 }
 
 .topbar__inner {
@@ -165,6 +179,7 @@ button {
 }
 
 /* Слот логотипа фиксирован — высота шапки не растёт */
+.brand--header,
 .brand--on-dark {
   flex-shrink: 0;
   display: block;
@@ -177,6 +192,8 @@ button {
   box-shadow: none;
 }
 
+.brand--header .brand__logo,
+.brand--header .brand__logo,
 .brand--on-dark .brand__logo {
   width: 100%;
   height: 100%;
@@ -988,11 +1005,12 @@ button {
   gap: 8px;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--bg-elevated);
+  border: 1px solid var(--separator);
   font-size: 14px;
   color: var(--text-secondary);
   max-width: 200px;
+  box-shadow: var(--shadow-elevated);
 }
 
 .garage-pill:hover {
@@ -1042,12 +1060,14 @@ button {
   }
 
   .topbar--store .brand,
+  .topbar__inner > .brand--header,
   .topbar__inner > .brand--on-dark {
     flex: 0 0 auto;
     min-width: 0;
     overflow: hidden;
   }
 
+  .brand--header,
   .brand--on-dark {
     width: min(var(--header-logo-w), 54vw);
     height: 42px;
@@ -1071,6 +1091,7 @@ button {
 }
 
 @media (max-width: 560px) {
+  .brand--header,
   .brand--on-dark {
     width: min(168px, 62vw);
     height: 36px;

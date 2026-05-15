@@ -1,6 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { IconCar, IconCart, IconClose, IconMenu, IconSearch } from './icons'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { IconCar, IconCart, IconClose, IconMenu } from './icons'
 import { useCart } from '../context/CartContext'
 import { useGarage } from '../context/GarageContext'
 import { categories } from '../data/catalog'
@@ -12,20 +12,10 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'nav__link nav__link--active' : 'nav__link'
 
 export function Layout() {
-  const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
   const location = useLocation()
   const { totalQty } = useCart()
   const { vehicle, label } = useGarage()
-
-  const onSearch = (e: FormEvent) => {
-    e.preventDefault()
-    const query = q.trim()
-    if (!query) return
-    navigate(`/search?q=${encodeURIComponent(query)}`)
-    setOpen(false)
-  }
 
   useEffect(() => {
     syncDocumentTitle(location.pathname)
@@ -33,63 +23,25 @@ export function Layout() {
 
   return (
     <div className="page">
-      <div className="strip">
-        <div className="shell strip__inner">
-          <span className="strip__item strip__item--muted">{layoutCopy.stripHours}</span>
-          <a className="strip__link" href="tel:+78001234567">
-            8 (800) 123-45-67
-          </a>
-          <Link className="strip__link" to="/delivery">
-            {layoutCopy.stripDelivery}
-          </Link>
-          <Link className="strip__link" to="/returns">
-            {layoutCopy.stripReturns}
-          </Link>
-          <Link className="strip__link strip__link--hide-sm" to="/support">
-            {layoutCopy.stripSupport}
-          </Link>
-        </div>
-      </div>
-
-      <header className="topbar topbar--store">
-        <div className="shell topbar__inner">
+      <header className="topbar topbar--store topbar--bare">
+        <div className="shell topbar__inner topbar__inner--bare">
           <button
             type="button"
-            className="btn btn--ghost menu-btn menu-btn--on-dark"
+            className="btn btn--ghost menu-btn"
             aria-label="Открыть меню"
             onClick={() => setOpen(true)}
           >
             <IconMenu />
           </button>
 
-          <Link to="/" className="brand brand--on-dark">
+          <Link to="/" className="brand brand--header">
             <img src={brandLogo} alt="Авто Династия" className="brand__logo" />
           </Link>
-
-          <form className="topbar-search topbar-search--store" role="search" onSubmit={onSearch}>
-            <label className="sr-only" htmlFor="global-q">
-              {layoutCopy.searchLabel}
-            </label>
-            <span className="topbar-search__icon" aria-hidden>
-              <IconSearch />
-            </span>
-            <input
-              id="global-q"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              className="topbar-search__input"
-              placeholder={layoutCopy.searchPlaceholder}
-              autoComplete="off"
-            />
-            <button type="submit" className="btn btn--solid topbar-search__btn">
-              {layoutCopy.searchSubmit}
-            </button>
-          </form>
 
           <div className="topbar__actions">
             <Link
               to="/garage"
-              className="garage-pill garage-pill--on-dark"
+              className="garage-pill"
               title={label}
               aria-label={vehicle ? label : layoutCopy.garageDefault}
             >
@@ -106,26 +58,6 @@ export function Layout() {
           </div>
         </div>
       </header>
-
-      <nav className="subnav" aria-label="Основные разделы">
-        <div className="shell subnav__inner">
-          <NavLink
-            to="/catalog"
-            className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}
-          >
-            {layoutCopy.subnavCatalog}
-          </NavLink>
-          <NavLink
-            to="/garage"
-            className={({ isActive }) => `subnav__link subnav__link--accent${isActive ? ' subnav__link--active' : ''}`}
-          >
-            {layoutCopy.subnavGarage}
-          </NavLink>
-          <NavLink to="/favorites" className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}>
-            {layoutCopy.subnavFavorites}
-          </NavLink>
-        </div>
-      </nav>
 
       {open ? (
         <div className="drawer-backdrop" role="presentation" onClick={() => setOpen(false)} />
