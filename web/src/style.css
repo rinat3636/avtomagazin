@@ -1691,6 +1691,14 @@ button {
   grid-column: 1 / -1;
 }
 
+.form-hint {
+  grid-column: 1 / -1;
+  margin: -4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
 .form-actions {
   display: flex;
   flex-wrap: wrap;

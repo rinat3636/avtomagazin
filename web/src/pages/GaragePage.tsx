@@ -1,9 +1,13 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Breadcrumbs, PageHeader } from '../components/Breadcrumbs'
 import type { Vehicle } from '../types'
 import { useGarage } from '../context/GarageContext'
 import { useToast } from '../context/ToastContext'
 import { garagePageCopy } from '../content/siteCopy'
+import { VEHICLE_BRANDS, vehicleModelHintsForBrand } from '../data/vehicleHints'
+
+const BRAND_LIST_ID = 'garage-datalist-brand'
+const MODEL_LIST_ID = 'garage-datalist-model'
 
 export function GaragePage() {
   const { vehicle, setVehicle } = useGarage()
@@ -23,6 +27,7 @@ export function GaragePage() {
       })
     }
   }, [vehicle])
+  const modelHints = useMemo(() => [...vehicleModelHintsForBrand(form.brand)], [form.brand])
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!form.brand.trim() || !form.model.trim()) {
@@ -47,6 +52,16 @@ export function GaragePage() {
 
       <div className="shell garage-layout">
         <form className="card-form" onSubmit={onSubmit}>
+          <datalist id={BRAND_LIST_ID}>
+            {VEHICLE_BRANDS.map((b) => (
+              <option key={b} value={b} />
+            ))}
+          </datalist>
+          <datalist id={MODEL_LIST_ID}>
+            {modelHints.map((m) => (
+              <option key={m} value={m} />
+            ))}
+          </datalist>
           <div className="form-grid">
             <label className="field-label">
               {garagePageCopy.labelBrand}
@@ -55,6 +70,8 @@ export function GaragePage() {
                 value={form.brand}
                 onChange={(e) => setForm((f) => ({ ...f, brand: e.target.value }))}
                 placeholder={garagePageCopy.phBrand}
+                list={BRAND_LIST_ID}
+                autoComplete="off"
                 required
               />
             </label>
@@ -65,9 +82,12 @@ export function GaragePage() {
                 value={form.model}
                 onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
                 placeholder={garagePageCopy.phModel}
+                list={MODEL_LIST_ID}
+                autoComplete="off"
                 required
               />
             </label>
+            <p className="form-hint">{garagePageCopy.hintsNote}</p>
             <label className="field-label">
               {garagePageCopy.labelYear}
               <input
