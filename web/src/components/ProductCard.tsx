@@ -39,6 +39,9 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
         <p className="product-card__sku">
           {product.sku} · OEM {product.oem}
         </p>
+        <p className={`product-card__stock ${product.inStock ? 'product-card__stock--ok' : 'product-card__stock--no'}`}>
+          {product.inStock ? `В наличии на складе: ${product.stock} шт.` : 'Нет в наличии — под заказ'}
+        </p>
         {!compact ? <p className="product-card__note">{product.shortNote}</p> : null}
         <div className="product-card__row">
           <div className="product-card__prices">

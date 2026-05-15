@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-do
 import { IconCar, IconCart, IconClose, IconMenu, IconSearch } from './icons'
 import { useCart } from '../context/CartContext'
 import { useGarage } from '../context/GarageContext'
+import { categories } from '../data/catalog'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'nav__link nav__link--active' : 'nav__link'
@@ -25,23 +26,42 @@ export function Layout() {
 
   return (
     <div className="page">
-      <header className="topbar">
+      <div className="strip">
+        <div className="shell strip__inner">
+          <span className="strip__item strip__item--muted">Пн–Сб 9:00–20:00 · Вс выходной</span>
+          <a className="strip__link" href="tel:+78001234567">
+            8 (800) 123-45-67
+          </a>
+          <Link className="strip__link" to="/delivery">
+            Доставка и оплата
+          </Link>
+          <Link className="strip__link" to="/returns">
+            Возврат и обмен
+          </Link>
+          <Link className="strip__link strip__link--hide-sm" to="/support">
+            Поддержка
+          </Link>
+        </div>
+      </div>
+
+      <header className="topbar topbar--store">
         <div className="shell topbar__inner">
           <button
             type="button"
-            className="btn btn--ghost menu-btn"
+            className="btn btn--ghost menu-btn menu-btn--on-dark"
             aria-label="Открыть меню"
             onClick={() => setOpen(true)}
           >
             <IconMenu />
           </button>
 
-          <Link to="/" className="brand">
+          <Link to="/" className="brand brand--on-dark">
             <span className="brand__mark" aria-hidden />
             <span className="brand__text">АвтоМагазин</span>
+            <span className="brand__tag">запчасти</span>
           </Link>
 
-          <form className="topbar-search" role="search" onSubmit={onSearch}>
+          <form className="topbar-search topbar-search--store" role="search" onSubmit={onSearch}>
             <label className="sr-only" htmlFor="global-q">
               Поиск по каталогу
             </label>
@@ -53,7 +73,7 @@ export function Layout() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="topbar-search__input"
-              placeholder="Артикул, OEM, название…"
+              placeholder="OEM, артикул, название детали…"
               autoComplete="off"
             />
             <button type="submit" className="btn btn--solid topbar-search__btn">
@@ -61,32 +81,14 @@ export function Layout() {
             </button>
           </form>
 
-          <nav className="nav" aria-label="Основное меню">
-            <NavLink to="/catalog" className={navClass}>
-              Каталог
-            </NavLink>
-            <NavLink to="/garage" className={navClass}>
-              Моё авто
-            </NavLink>
-            <NavLink to="/favorites" className={navClass}>
-              Избранное
-            </NavLink>
-            <NavLink to="/delivery" className={navClass}>
-              Доставка
-            </NavLink>
-            <NavLink to="/support" className={navClass}>
-              Поддержка
-            </NavLink>
-          </nav>
-
           <div className="topbar__actions">
-            <Link to="/garage" className="garage-pill" title={label}>
+            <Link to="/garage" className="garage-pill garage-pill--on-dark" title={label}>
               <IconCar className="icon" />
               <span className="garage-pill__text">
-                {vehicle ? `${vehicle.brand} ${vehicle.model}` : 'Гараж'}
+                {vehicle ? `${vehicle.brand} ${vehicle.model}` : 'Моё авто'}
               </span>
             </Link>
-            <Link to="/cart" className="btn btn--primary cart-btn">
+            <Link to="/cart" className="btn btn--cart cart-btn">
               <IconCart />
               <span>Корзина</span>
               {totalQty > 0 ? <span className="cart-badge">{totalQty > 99 ? '99+' : totalQty}</span> : null}
@@ -94,6 +96,25 @@ export function Layout() {
           </div>
         </div>
       </header>
+
+      <nav className="subnav" aria-label="Разделы каталога">
+        <div className="shell subnav__inner">
+          <NavLink to="/catalog" className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`} end>
+            Все разделы
+          </NavLink>
+          {categories.map((c) => (
+            <NavLink key={c.id} to={`/catalog/${c.id}`} className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}>
+              {c.label}
+            </NavLink>
+          ))}
+          <NavLink to="/garage" className={({ isActive }) => `subnav__link subnav__link--accent${isActive ? ' subnav__link--active' : ''}`}>
+            Подбор по авто
+          </NavLink>
+          <NavLink to="/favorites" className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}>
+            Избранное
+          </NavLink>
+        </div>
+      </nav>
 
       {open ? (
         <div className="drawer-backdrop" role="presentation" onClick={() => setOpen(false)} />
@@ -112,6 +133,11 @@ export function Layout() {
           <NavLink to="/catalog" className={navClass} onClick={() => setOpen(false)}>
             Каталог
           </NavLink>
+          {categories.map((c) => (
+            <NavLink key={c.id} to={`/catalog/${c.id}`} className={navClass} onClick={() => setOpen(false)}>
+              {c.label}
+            </NavLink>
+          ))}
           <NavLink to="/garage" className={navClass} onClick={() => setOpen(false)}>
             Моё авто
           </NavLink>
