@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Breadcrumbs, PageHeader } from '../components/Breadcrumbs'
+import { GarageAutocomplete } from '../components/GarageAutocomplete'
 import type { Vehicle } from '../types'
 import { useGarage } from '../context/GarageContext'
 import { useToast } from '../context/ToastContext'
 import { garagePageCopy } from '../content/siteCopy'
-import { VEHICLE_BRANDS, vehicleModelHintsForBrand, ENGINE_HINTS } from '../data/vehicleHints'
-
-const BRAND_LIST_ID = 'garage-datalist-brand'
-const MODEL_LIST_ID = 'garage-datalist-model'
-const ENGINE_LIST_ID = 'garage-datalist-engine'
+import {
+  brandHintsForInput,
+  engineHintsForVehicle,
+  modelsForBrandInput,
+  resolveCatalogModel,
+  resolveVehicleBrand,
+} from '../data/vehicleHints'
 
 export function GaragePage() {
   const { vehicle, setVehicle } = useGarage()
@@ -28,7 +31,41 @@ export function GaragePage() {
       })
     }
   }, [vehicle])
-  const modelHints = useMemo(() => [...vehicleModelHintsForBrand(form.brand)], [form.brand])
+
+  const brandPool = useMemo(() => {
+    const q = form.brand.trim()
+    return q ? brandHintsForInput(q, 24) : [...brandHintsForInput('', 14)]
+  }, [form.brand])
+
+  const modelPool = useMemo(() => modelsForBrandInput(form.brand), [form.brand])
+  const enginePool = useMemo(
+    () => engineHintsForVehicle(form.brand, form.model),
+    [form.brand, form.model],
+  )
+  const catalogModel = resolveCatalogModel(form.brand, form.model)
+  const hasBrand = Boolean(form.brand.trim())
+
+  const setBrand = (brand: string) => {
+    setForm((f) => ({
+      ...f,
+      brand,
+      model: resolveVehicleBrand(brand) === resolveVehicleBrand(f.brand) ? f.model : '',
+      engine:
+        resolveVehicleBrand(brand) === resolveVehicleBrand(f.brand) &&
+        resolveCatalogModel(brand, f.model) === resolveCatalogModel(f.brand, f.model)
+          ? f.engine
+          : '',
+    }))
+  }
+
+  const setModel = (model: string) => {
+    setForm((f) => ({
+      ...f,
+      model,
+      engine: resolveCatalogModel(f.brand, model) === resolveCatalogModel(f.brand, f.model) ? f.engine : '',
+    }))
+  }
+
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!form.brand.trim() || !form.model.trim()) {
@@ -53,46 +90,25 @@ export function GaragePage() {
 
       <div className="shell garage-layout">
         <form className="card-form" onSubmit={onSubmit}>
-          <datalist id={BRAND_LIST_ID}>
-            {VEHICLE_BRANDS.map((b) => (
-              <option key={b} value={b} />
-            ))}
-          </datalist>
-          <datalist id={MODEL_LIST_ID}>
-            {modelHints.map((m) => (
-              <option key={m} value={m} />
-            ))}
-          </datalist>
-          <datalist id={ENGINE_LIST_ID}>
-            {ENGINE_HINTS.map((e) => (
-              <option key={e} value={e} />
-            ))}
-          </datalist>
           <div className="form-grid">
-            <label className="field-label">
-              {garagePageCopy.labelBrand}
-              <input
-                className="field"
-                value={form.brand}
-                onChange={(e) => setForm((f) => ({ ...f, brand: e.target.value }))}
-                placeholder={garagePageCopy.phBrand}
-                list={BRAND_LIST_ID}
-                autoComplete="off"
-                required
-              />
-            </label>
-            <label className="field-label">
-              {garagePageCopy.labelModel}
-              <input
-                className="field"
-                value={form.model}
-                onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
-                placeholder={garagePageCopy.phModel}
-                list={MODEL_LIST_ID}
-                autoComplete="off"
-                required
-              />
-            </label>
+            <GarageAutocomplete
+              label={garagePageCopy.labelBrand}
+              value={form.brand}
+              onChange={setBrand}
+              options={brandPool}
+              placeholder={garagePageCopy.phBrand}
+              required
+            />
+            <GarageAutocomplete
+              label={garagePageCopy.labelModel}
+              value={form.model}
+              onChange={setModel}
+              options={modelPool}
+              placeholder={garagePageCopy.phModel}
+              required
+              suppressList={!hasBrand}
+              emptyHint={!hasBrand ? garagePageCopy.modelNeedBrand : undefined}
+            />
             <p className="form-hint">{garagePageCopy.hintsNote}</p>
             <label className="field-label">
               {garagePageCopy.labelYear}
@@ -105,17 +121,15 @@ export function GaragePage() {
                 onChange={(e) => setForm((f) => ({ ...f, year: Number(e.target.value) }))}
               />
             </label>
-            <label className="field-label">
-              {garagePageCopy.labelEngine}
-              <input
-                className="field"
-                value={form.engine}
-                onChange={(e) => setForm((f) => ({ ...f, engine: e.target.value }))}
-                placeholder={garagePageCopy.phEngine}
-                list={ENGINE_LIST_ID}
-                autoComplete="off"
-              />
-            </label>
+            <GarageAutocomplete
+              label={garagePageCopy.labelEngine}
+              value={form.engine}
+              onChange={(engine) => setForm((f) => ({ ...f, engine }))}
+              options={enginePool}
+              placeholder={garagePageCopy.phEngine}
+              suppressList={!catalogModel}
+              emptyHint={!catalogModel ? garagePageCopy.engineNeedModel : undefined}
+            />
             <label className="field-label field-label--full">
               {garagePageCopy.labelVin}
               <input

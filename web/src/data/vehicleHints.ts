@@ -3,6 +3,8 @@
  * (генератор `scripts/gen-vehicle-catalog.mjs` — легковые, LCV, фуры, автобусы, прицепы).
  */
 
+import { filterByPrefix, matchesPrefix, normSearch } from '../lib/searchPrefix'
+import { ENGINE_BY_MODEL } from './vehicleEngineHints'
 import { TRUCK_AND_BUS_BRANDS, VEHICLE_MODELS_BY_BRAND } from './vehicleCatalog'
 
 export { TRUCK_AND_BUS_BRANDS, VEHICLE_MODELS_BY_BRAND }
@@ -110,7 +112,35 @@ const BRAND_ALIASES: Readonly<Record<string, BrandKey>> = {
 }
 
 function prefixMatches(raw: string): BrandKey[] {
-  return brandKeys.filter((k) => k.toLowerCase().startsWith(raw))
+  const q = normSearch(raw)
+  return brandKeys.filter((k) => matchesPrefix(k, q))
+}
+
+/** Марки по вводу (префикс + алиасы: «л» → Lada). */
+export function brandHintsForInput(query: string, limit = 14): string[] {
+  const q = normSearch(query)
+  const found = new Set<string>()
+
+  for (const key of brandKeys) {
+    if (!q || matchesPrefix(key, q)) found.add(key)
+  }
+  for (const [alias, brand] of Object.entries(BRAND_ALIASES)) {
+    if (!q || alias.startsWith(q) || matchesPrefix(brand, q)) found.add(brand)
+  }
+
+  return [...found]
+    .sort((a, b) => a.localeCompare(b, 'ru', { sensitivity: 'base' }))
+    .slice(0, limit)
+}
+
+function brandsForModelPool(brandInput: string): BrandKey[] {
+  const resolved = resolveVehicleBrand(brandInput)
+  if (resolved) return [resolved as BrandKey]
+
+  const q = normSearch(brandInput)
+  if (!q) return []
+
+  return prefixMatches(q).slice(0, 5)
 }
 
 /** Определяет каноническую марку по строке из поля «Марка». */
@@ -124,7 +154,7 @@ export function resolveVehicleBrand(input: string): string | undefined {
   const exact = brandKeys.find((k) => k.toLowerCase() === raw)
   if (exact) return exact
 
-  if (raw.length >= 2) {
+  if (raw.length >= 1) {
     const matches = prefixMatches(raw)
     if (matches.length === 1) return matches[0]
     if (matches.length > 1) {
@@ -137,84 +167,44 @@ export function resolveVehicleBrand(input: string): string | undefined {
   return undefined
 }
 
-/** Модели для подсказки: по распознанной марке или общий список (усечённый при необходимости). */
-export function vehicleModelHintsForBrand(brandInput: string): readonly string[] {
-  const key = resolveVehicleBrand(brandInput) as BrandKey | undefined
-  if (key && VEHICLE_MODELS_BY_BRAND[key]) return VEHICLE_MODELS_BY_BRAND[key]
-  return ALL_VEHICLE_MODEL_HINTS
+/** Каноническое имя модели из каталога по вводу (точное или единственный префикс). */
+export function resolveCatalogModel(brandInput: string, modelInput: string): string | undefined {
+  const brand = resolveVehicleBrand(brandInput) as BrandKey | undefined
+  if (!brand) return undefined
+  const models = VEHICLE_MODELS_BY_BRAND[brand]
+  if (!models?.length) return undefined
+
+  const raw = modelInput.trim()
+  if (!raw) return undefined
+
+  const exact = models.find((m) => normSearch(m) === normSearch(raw))
+  if (exact) return exact
+
+  const q = normSearch(raw)
+  const byPrefix = models.filter((m) => matchesPrefix(m, q))
+  if (byPrefix.length === 1) return byPrefix[0]
+  return undefined
 }
 
-/** Типовые варианты двигателей для поля «Двигатель» в гараже. */
-export const ENGINE_HINTS: readonly string[] = [
-  // ── Бензин / МТ ──
-  '1.0 MT (65 л.с.)',
-  '1.2 MT (75 л.с.)',
-  '1.2 MT (82 л.с.)',
-  '1.4 MT (90 л.с.)',
-  '1.4 MT (100 л.с.)',
-  '1.4 TSI MT (125 л.с.)',
-  '1.4 TSI AT (125 л.с.)',
-  '1.4 TSI AT (140 л.с.)',
-  '1.5 MT (106 л.с.)',
-  '1.5 MT (113 л.с.)',
-  '1.5 AT (113 л.с.)',
-  '1.6 MT (90 л.с.)',
-  '1.6 MT (98 л.с.)',
-  '1.6 MT (105 л.с.)',
-  '1.6 MT (110 л.с.)',
-  '1.6 MT (117 л.с.)',
-  '1.6 AT (110 л.с.)',
-  '1.6 AT (117 л.с.)',
-  '1.6 AT (122 л.с.)',
-  '1.8 MT (120 л.с.)',
-  '1.8 MT (140 л.с.)',
-  '1.8 AT (140 л.с.)',
-  '1.8 MT (152 л.с.)',
-  '2.0 MT (130 л.с.)',
-  '2.0 MT (150 л.с.)',
-  '2.0 AT (150 л.с.)',
-  '2.0 AT (167 л.с.)',
-  '2.0 TSI MT (200 л.с.)',
-  '2.0 TSI AT (200 л.с.)',
-  '2.0 TSI AT (220 л.с.)',
-  '2.0 AT (150 л.с.) Toyota',
-  '2.0 CVT (150 л.с.)',
-  '2.4 AT (167 л.с.)',
-  '2.4 AT (180 л.с.)',
-  '2.5 AT (182 л.с.)',
-  '2.5 AT (205 л.с.)',
-  '3.0 AT (230 л.с.)',
-  '3.5 V6 AT (249 л.с.)',
-  '3.5 V6 AT (272 л.с.)',
-  // ── Турбо / GDI ──
-  '1.0 T-GDI AT (100 л.с.)',
-  '1.4 T-GDI AT (140 л.с.)',
-  '1.5 T-GDI AT (150 л.с.)',
-  '2.0 T-GDI AT (180 л.с.)',
-  // ── Дизель ──
-  '1.5 dCi MT (86 л.с.)',
-  '1.5 dCi AT (110 л.с.)',
-  '1.6 HDi MT (90 л.с.)',
-  '1.6 HDi MT (114 л.с.)',
-  '1.9 TDI MT (100 л.с.)',
-  '1.9 TDI MT (105 л.с.)',
-  '2.0 TDI MT (136 л.с.)',
-  '2.0 TDI MT (140 л.с.)',
-  '2.0 TDI AT (150 л.с.)',
-  '2.0 TDI AT (163 л.с.)',
-  '2.0 CDi AT (136 л.с.)',
-  '2.2 D AT (150 л.с.)',
-  '2.4 D5 AT (175 л.с.)',
-  '3.0 TDI AT (211 л.с.)',
-  '3.0 TDI AT (240 л.с.)',
-  '3.0 TDI AT (272 л.с.)',
-  // ── Гибрид ──
-  '1.8 Hybrid AT (122 л.с.)',
-  '2.0 Hybrid AT (218 л.с.)',
-  '2.5 Hybrid AT (218 л.с.)',
-  '2.5 Hybrid AT (245 л.с.)',
-  // ── Электро ──
-  'Электродвигатель (150 кВт)',
-  'Электродвигатель (220 кВт)',
-  'Электродвигатель (360 кВт)',
-]
+/** Полный список моделей марки для автокомплита. */
+export function modelsForBrandInput(brandInput: string): readonly string[] {
+  const brands = brandsForModelPool(brandInput)
+  if (!brands.length) return []
+  const pool = brands.flatMap((b) => [...VEHICLE_MODELS_BY_BRAND[b]])
+  return [...new Set(pool)]
+}
+
+/** Модели с фильтром по префиксу; без марки — пусто. */
+export function modelHintsForInput(brandInput: string, modelQuery: string, limit = 14): string[] {
+  const pool = modelsForBrandInput(brandInput)
+  if (!pool.length) return []
+  return filterByPrefix(pool, modelQuery, limit)
+}
+
+/** Двигатели только для выбранной пары марка + модель из каталога. */
+export function engineHintsForVehicle(brandInput: string, modelInput: string): readonly string[] {
+  const brand = resolveVehicleBrand(brandInput)
+  const model = resolveCatalogModel(brandInput, modelInput)
+  if (!brand || !model) return []
+  return ENGINE_BY_MODEL[`${brand}|${model}`] ?? []
+}

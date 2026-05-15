@@ -1722,6 +1722,56 @@ button {
   color: var(--text-tertiary);
 }
 
+.garage-ac {
+  position: relative;
+}
+
+.garage-ac__wrap {
+  position: relative;
+}
+
+.garage-ac__list {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-soft);
+}
+
+.garage-ac__opt {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.garage-ac__opt:hover,
+.garage-ac__opt--active {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.garage-ac__empty {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
 .form-actions {
   display: flex;
   flex-wrap: wrap;
