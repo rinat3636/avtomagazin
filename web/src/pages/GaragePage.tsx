@@ -3,6 +3,7 @@ import { Breadcrumbs, PageHeader } from '../components/Breadcrumbs'
 import type { Vehicle } from '../types'
 import { useGarage } from '../context/GarageContext'
 import { useToast } from '../context/ToastContext'
+import { garagePageCopy } from '../content/siteCopy'
 
 export function GaragePage() {
   const { vehicle, setVehicle } = useGarage()
@@ -25,7 +26,7 @@ export function GaragePage() {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!form.brand.trim() || !form.model.trim()) {
-      toast.show('Укажите марку и модель')
+      toast.show(garagePageCopy.toastNeedBrand)
       return
     }
     const v: Vehicle = {
@@ -36,42 +37,39 @@ export function GaragePage() {
       vin: form.vin?.trim() || undefined,
     }
     setVehicle(v)
-    toast.show('Автомобиль сохранён в гараж')
+    toast.show(garagePageCopy.toastSaved)
   }
 
   return (
     <main>
-      <Breadcrumbs items={[{ to: '/', label: 'Главная' }, { label: 'Моё авто' }]} />
-      <PageHeader
-        title="Моё авто"
-        subtitle="Укажите марку, модель, год выпуска, модификацию двигателя и при необходимости VIN — данные используются для отбора применимых позиций в каталоге."
-      />
+      <Breadcrumbs items={[{ to: '/', label: 'Главная' }, { label: garagePageCopy.breadcrumb }]} />
+      <PageHeader title={garagePageCopy.title} subtitle={garagePageCopy.subtitle} />
 
       <div className="shell garage-layout">
         <form className="card-form" onSubmit={onSubmit}>
           <div className="form-grid">
             <label className="field-label">
-              Марка
+              {garagePageCopy.labelBrand}
               <input
                 className="field"
                 value={form.brand}
                 onChange={(e) => setForm((f) => ({ ...f, brand: e.target.value }))}
-                placeholder="BMW"
+                placeholder={garagePageCopy.phBrand}
                 required
               />
             </label>
             <label className="field-label">
-              Модель
+              {garagePageCopy.labelModel}
               <input
                 className="field"
                 value={form.model}
                 onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
-                placeholder="3 G20"
+                placeholder={garagePageCopy.phModel}
                 required
               />
             </label>
             <label className="field-label">
-              Год
+              {garagePageCopy.labelYear}
               <input
                 className="field"
                 type="number"
@@ -82,16 +80,16 @@ export function GaragePage() {
               />
             </label>
             <label className="field-label">
-              Двигатель
+              {garagePageCopy.labelEngine}
               <input
                 className="field"
                 value={form.engine}
                 onChange={(e) => setForm((f) => ({ ...f, engine: e.target.value }))}
-                placeholder="320i · 184 л.с."
+                placeholder={garagePageCopy.phEngine}
               />
             </label>
             <label className="field-label field-label--full">
-              VIN (необязательно)
+              {garagePageCopy.labelVin}
               <input
                 className="field"
                 value={form.vin ?? ''}
@@ -99,13 +97,13 @@ export function GaragePage() {
                   setForm((f) => ({ ...f, vin: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))
                 }
                 maxLength={17}
-                placeholder="17 символов"
+                placeholder={garagePageCopy.phVin}
               />
             </label>
           </div>
           <div className="form-actions">
             <button type="submit" className="btn btn--solid">
-              Сохранить
+              {garagePageCopy.save}
             </button>
             <button
               type="button"
@@ -113,17 +111,17 @@ export function GaragePage() {
               onClick={() => {
                 setVehicle(null)
                 setForm({ brand: '', model: '', year: new Date().getFullYear(), engine: '', vin: '' })
-                toast.show('Гараж очищен')
+                toast.show(garagePageCopy.toastGarageCleared)
               }}
             >
-              Очистить
+              {garagePageCopy.clear}
             </button>
           </div>
         </form>
 
         {vehicle ? (
           <aside className="garage-aside">
-            <p className="garage-aside__k">Текущее авто</p>
+            <p className="garage-aside__k">{garagePageCopy.asideKicker}</p>
             <p className="garage-aside__t">
               {vehicle.brand} {vehicle.model} · {vehicle.year}
             </p>

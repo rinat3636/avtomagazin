@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext'
 import { useFavorites } from '../context/FavoritesContext'
 import { useToast } from '../context/ToastContext'
 import { IconHeart } from './icons'
+import { productUiCopy } from '../content/siteCopy'
 
 export function ProductCard({ product, compact }: { product: Product; compact?: boolean }) {
   const { add } = useCart()
@@ -18,7 +19,7 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
         to={`/product/${product.slug}`}
         className="product-card__media"
         tabIndex={-1}
-        aria-label={`${product.name} — открыть карточку`}
+        aria-label={productUiCopy.ariaOpenCard(product.name)}
       >
         <span className="product-card__placeholder" aria-hidden />
       </Link>
@@ -28,11 +29,11 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
           <button
             type="button"
             className={`icon-btn${fav ? ' icon-btn--active' : ''}`}
-            aria-label={fav ? 'Убрать из избранного' : 'В избранное'}
+            aria-label={fav ? productUiCopy.ariaFavRemove : productUiCopy.ariaFavAdd}
             onClick={(e) => {
               e.preventDefault()
               toggle(product.id)
-              toast.show(fav ? 'Удалено из избранного' : 'Добавлено в избранное')
+              toast.show(fav ? productUiCopy.favRemove : productUiCopy.favAdd)
             }}
           >
             <IconHeart filled={fav} />
@@ -42,11 +43,9 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
           <Link to={`/product/${product.slug}`}>{product.name}</Link>
         </h3>
         <p className="product-card__mfr">{product.manufacturer}</p>
-        <p className="product-card__sku">
-          Артикул {product.sku} · № {product.oem}
-        </p>
+        <p className="product-card__sku">{productUiCopy.skuLine(product.sku, product.oem)}</p>
         <p className={`product-card__stock ${product.inStock ? 'product-card__stock--ok' : 'product-card__stock--no'}`}>
-          {product.inStock ? `В наличии на складе: ${product.stock} шт.` : 'Нет в наличии — под заказ'}
+          {product.inStock ? productUiCopy.stockIn(product.stock) : productUiCopy.stockOut}
         </p>
         {!compact ? <p className="product-card__note">{product.shortNote}</p> : null}
         <div className="product-card__row">
@@ -62,10 +61,10 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
             disabled={!product.inStock}
             onClick={() => {
               add(product.id, 1)
-              toast.show('Товар добавлен в корзину')
+              toast.show(productUiCopy.addedToast)
             }}
           >
-            {product.inStock ? 'В корзину' : 'Нет'}
+            {product.inStock ? productUiCopy.addToCart : productUiCopy.unavailable}
           </button>
         </div>
       </div>

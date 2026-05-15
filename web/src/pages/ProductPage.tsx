@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext'
 import { useFavorites } from '../context/FavoritesContext'
 import { useToast } from '../context/ToastContext'
 import { IconHeart } from '../components/icons'
+import { productPageCopy, productUiCopy } from '../content/siteCopy'
 
 export function ProductPage() {
   const { slug } = useParams()
@@ -33,7 +34,8 @@ export function ProductPage() {
   const fav = has(product.id)
   const maxOrder = product.inStock ? Math.max(1, product.stock) : 1
 
-  const categoryLabel = categories.find((c) => c.id === product.categoryId)?.label ?? 'Категория'
+  const categoryLabel =
+    categories.find((c) => c.id === product.categoryId)?.label ?? productPageCopy.categoryFallback
 
   return (
     <main>
@@ -50,14 +52,17 @@ export function ProductPage() {
           <span className="product-page__placeholder" aria-hidden />
           <div className="product-page__badges">
             <span className="pill">{product.tag}</span>
-            {!product.inStock ? <span className="pill pill--warn">Нет в наличии</span> : null}
+            {!product.inStock ? <span className="pill pill--warn">{productPageCopy.pillOut}</span> : null}
           </div>
         </div>
 
         <div className="product-page__info">
-          <PageHeader title={product.name} subtitle={`${product.manufacturer} · артикул ${product.sku}`} />
+          <PageHeader
+            title={product.name}
+            subtitle={productPageCopy.subtitle(product.manufacturer, product.sku)}
+          />
           <p className="product-page__oem">
-            Номер на упаковке (каталожный): <span>{product.oem}</span>
+            {productPageCopy.oemLead} <span>{product.oem}</span>
           </p>
           <p className="product-page__lead">{product.shortNote}</p>
 
@@ -72,10 +77,10 @@ export function ProductPage() {
               <button
                 type="button"
                 className={`icon-btn icon-btn--lg${fav ? ' icon-btn--active' : ''}`}
-                aria-label="Избранное"
+                aria-label={productPageCopy.favAria}
                 onClick={() => {
                   toggle(product.id)
-                  toast.show(fav ? 'Удалено из избранного' : 'Добавлено в избранное')
+                  toast.show(fav ? productUiCopy.favRemove : productUiCopy.favAdd)
                 }}
               >
                 <IconHeart filled={fav} />
@@ -85,7 +90,7 @@ export function ProductPage() {
 
           <div className="product-page__controls">
             <label className="qty" htmlFor="pqty">
-              Количество
+              {productPageCopy.qtyLabel}
               <input
                 id="pqty"
                 type="number"
@@ -107,25 +112,25 @@ export function ProductPage() {
               disabled={!product.inStock}
               onClick={() => {
                 add(product.id, qty)
-                toast.show(`Добавлено: ${qty} шт.`)
+                toast.show(productUiCopy.addedToastQty(qty))
               }}
             >
-              В корзину
+              {productPageCopy.addWide}
             </button>
             <Link to="/cart" className="btn btn--outline">
-              Перейти в корзину
+              {productPageCopy.toCart}
             </Link>
           </div>
 
           {line ? (
             <div className="in-cart">
-              <p className="in-cart__title">Уже в корзине: {line.qty} шт.</p>
+              <p className="in-cart__title">{productPageCopy.inCartTitle(line.qty)}</p>
               <div className="in-cart__row">
                 <button type="button" className="btn btn--ghost" onClick={() => setQtyInput(line.qty)}>
-                  Синхронизировать кол-во
+                  {productPageCopy.syncQty}
                 </button>
                 <button type="button" className="btn btn--ghost" onClick={() => remove(product.id)}>
-                  Убрать
+                  {productPageCopy.removeLine}
                 </button>
               </div>
             </div>
@@ -133,14 +138,14 @@ export function ProductPage() {
 
           <section className="product-section" aria-labelledby="desc">
             <h2 id="desc" className="product-section__title">
-              Описание
+              {productPageCopy.sectionDesc}
             </h2>
             <p className="product-section__text">{product.description}</p>
           </section>
 
           <section className="product-section" aria-labelledby="compat">
             <h2 id="compat" className="product-section__title">
-              Применимость (пример)
+              {productPageCopy.sectionCompat}
             </h2>
             <ul className="compat-list">
               {product.compatibility.map((c) => (
@@ -152,20 +157,22 @@ export function ProductPage() {
           <table className="spec-table">
             <tbody>
               <tr>
-                <th>Производитель</th>
+                <th>{productPageCopy.specMfr}</th>
                 <td>{product.manufacturer}</td>
               </tr>
               <tr>
-                <th>Артикул</th>
+                <th>{productPageCopy.specSku}</th>
                 <td>{product.sku}</td>
               </tr>
               <tr>
-                <th>Номер на упаковке</th>
+                <th>{productPageCopy.specOem}</th>
                 <td>{product.oem}</td>
               </tr>
               <tr>
-                <th>Остаток на складе</th>
-                <td>{product.inStock ? `${product.stock} шт.` : 'Под заказ'}</td>
+                <th>{productPageCopy.specStock}</th>
+                <td>
+                  {product.inStock ? productPageCopy.specStockVal(product.stock) : productPageCopy.specStockOrder}
+                </td>
               </tr>
             </tbody>
           </table>

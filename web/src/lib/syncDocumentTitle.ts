@@ -11,7 +11,7 @@ export function syncDocumentTitle(pathname: string): void {
   else if (pathname.includes('/cart')) suffix = ' — корзина'
   else if (pathname.includes('/checkout')) suffix = ' — оформление заказа'
   else if (pathname.includes('/order/success')) suffix = ' — заказ принят'
-  else if (pathname.includes('/garage')) suffix = ' — моё авто'
+  else if (pathname.includes('/garage')) suffix = ' — гараж'
   else if (pathname.includes('/favorites')) suffix = ' — избранное'
   else if (pathname.includes('/delivery')) suffix = ' — доставка и оплата'
   else if (pathname.includes('/returns')) suffix = ' — возврат'

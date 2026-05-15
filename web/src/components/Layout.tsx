@@ -4,6 +4,7 @@ import { IconCar, IconCart, IconClose, IconMenu, IconSearch } from './icons'
 import { useCart } from '../context/CartContext'
 import { useGarage } from '../context/GarageContext'
 import { categories } from '../data/catalog'
+import { layoutCopy } from '../content/siteCopy'
 import { syncDocumentTitle } from '../lib/syncDocumentTitle'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
@@ -33,18 +34,18 @@ export function Layout() {
     <div className="page">
       <div className="strip">
         <div className="shell strip__inner">
-          <span className="strip__item strip__item--muted">Пн–Сб 9:00–20:00 · Вс выходной</span>
+          <span className="strip__item strip__item--muted">{layoutCopy.stripHours}</span>
           <a className="strip__link" href="tel:+78001234567">
             8 (800) 123-45-67
           </a>
           <Link className="strip__link" to="/delivery">
-            Доставка и оплата
+            {layoutCopy.stripDelivery}
           </Link>
           <Link className="strip__link" to="/returns">
-            Возврат и обмен
+            {layoutCopy.stripReturns}
           </Link>
           <Link className="strip__link strip__link--hide-sm" to="/support">
-            Поддержка
+            {layoutCopy.stripSupport}
           </Link>
         </div>
       </div>
@@ -63,12 +64,12 @@ export function Layout() {
           <Link to="/" className="brand brand--on-dark">
             <span className="brand__mark" aria-hidden />
             <span className="brand__text">АвтоМагазин</span>
-            <span className="brand__tag">запчасти</span>
+            <span className="brand__tag">{layoutCopy.brandTag}</span>
           </Link>
 
           <form className="topbar-search topbar-search--store" role="search" onSubmit={onSearch}>
             <label className="sr-only" htmlFor="global-q">
-              Поиск по каталогу
+              {layoutCopy.searchLabel}
             </label>
             <span className="topbar-search__icon" aria-hidden>
               <IconSearch />
@@ -78,11 +79,11 @@ export function Layout() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="topbar-search__input"
-              placeholder="Номер детали или название"
+              placeholder={layoutCopy.searchPlaceholder}
               autoComplete="off"
             />
             <button type="submit" className="btn btn--solid topbar-search__btn">
-              Найти
+              {layoutCopy.searchSubmit}
             </button>
           </form>
 
@@ -91,38 +92,38 @@ export function Layout() {
               to="/garage"
               className="garage-pill garage-pill--on-dark"
               title={label}
-              aria-label={vehicle ? label : 'Моё авто'}
+              aria-label={vehicle ? label : layoutCopy.garageDefault}
             >
               <IconCar className="icon" />
               <span className="garage-pill__text">
-                {vehicle ? `${vehicle.brand} ${vehicle.model}` : 'Моё авто'}
+                {vehicle ? `${vehicle.brand} ${vehicle.model}` : layoutCopy.garageDefault}
               </span>
             </Link>
-            <Link to="/cart" className="btn btn--cart cart-btn" aria-label="Корзина">
+            <Link to="/cart" className="btn btn--cart cart-btn" aria-label={layoutCopy.cart}>
               <IconCart />
-              <span className="cart-btn__label">Корзина</span>
+              <span className="cart-btn__label">{layoutCopy.cart}</span>
               {totalQty > 0 ? <span className="cart-badge">{totalQty > 99 ? '99+' : totalQty}</span> : null}
             </Link>
           </div>
         </div>
       </header>
 
-      <nav className="subnav" aria-label="Разделы сайта">
+      <nav className="subnav" aria-label="Основные разделы">
         <div className="shell subnav__inner">
           <NavLink
             to="/catalog"
             className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}
           >
-            Каталог
+            {layoutCopy.subnavCatalog}
           </NavLink>
           <NavLink
             to="/garage"
             className={({ isActive }) => `subnav__link subnav__link--accent${isActive ? ' subnav__link--active' : ''}`}
           >
-            Моё авто
+            {layoutCopy.subnavGarage}
           </NavLink>
           <NavLink to="/favorites" className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}>
-            Избранное
+            {layoutCopy.subnavFavorites}
           </NavLink>
         </div>
       </nav>
@@ -132,42 +133,42 @@ export function Layout() {
       ) : null}
       <aside className={`drawer${open ? ' drawer--open' : ''}`} aria-hidden={!open}>
         <div className="drawer__head">
-          <span className="drawer__title">Меню</span>
+          <span className="drawer__title">{layoutCopy.drawerTitle}</span>
           <button type="button" className="btn btn--ghost" aria-label="Закрыть" onClick={() => setOpen(false)}>
             <IconClose />
           </button>
         </div>
-        <nav className="drawer__nav" aria-label="Мобильное меню">
+        <nav className="drawer__nav" aria-label="Мобильная навигация">
           <NavLink to="/" end className={navClass} onClick={() => setOpen(false)}>
-            Главная
+            {layoutCopy.drawerHome}
           </NavLink>
           <NavLink to="/catalog" className={navClass} onClick={() => setOpen(false)}>
-            Весь каталог
+            {layoutCopy.drawerCatalog}
           </NavLink>
           <NavLink to="/garage" className={navClass} onClick={() => setOpen(false)}>
-            Моё авто
+            {layoutCopy.drawerGarage}
           </NavLink>
           <NavLink to="/cart" className={navClass} onClick={() => setOpen(false)}>
-            Корзина
+            {layoutCopy.drawerCart}
           </NavLink>
           <NavLink to="/favorites" className={navClass} onClick={() => setOpen(false)}>
-            Избранное
+            {layoutCopy.drawerFavorites}
           </NavLink>
-          <div className="drawer__group-label">Разделы каталога</div>
+          <div className="drawer__group-label">{layoutCopy.drawerGroupCatalog}</div>
           {categories.map((c) => (
             <NavLink key={c.id} to={`/catalog/${c.id}`} className={navClass} onClick={() => setOpen(false)}>
               {c.label}
             </NavLink>
           ))}
-          <div className="drawer__group-label">Помощь</div>
+          <div className="drawer__group-label">{layoutCopy.drawerGroupService}</div>
           <NavLink to="/delivery" className={navClass} onClick={() => setOpen(false)}>
-            Доставка и оплата
+            {layoutCopy.stripDelivery}
           </NavLink>
           <NavLink to="/returns" className={navClass} onClick={() => setOpen(false)}>
-            Возврат
+            {layoutCopy.stripReturns}
           </NavLink>
           <NavLink to="/support" className={navClass} onClick={() => setOpen(false)}>
-            Поддержка
+            {layoutCopy.stripSupport}
           </NavLink>
         </nav>
       </aside>
@@ -181,18 +182,16 @@ export function Layout() {
               <span className="brand__mark" aria-hidden />
               <span className="brand__text">АвтоМагазин</span>
             </p>
-            <p className="footer__muted">
-              Запчасти и расходники. Подбор по автомобилю, доставка и самовывоз.
-            </p>
+            <p className="footer__muted">{layoutCopy.footerLead}</p>
           </div>
           <div>
-            <p className="footer__label">Покупателям</p>
+            <p className="footer__label">{layoutCopy.footerBuyers}</p>
             <ul className="footer__links">
               <li>
                 <Link to="/catalog">Каталог</Link>
               </li>
               <li>
-                <Link to="/garage">Моё авто</Link>
+                <Link to="/garage">{layoutCopy.subnavGarage}</Link>
               </li>
               <li>
                 <Link to="/delivery">Доставка и оплата</Link>
@@ -203,7 +202,7 @@ export function Layout() {
             </ul>
           </div>
           <div>
-            <p className="footer__label">Контакты</p>
+            <p className="footer__label">{layoutCopy.footerContacts}</p>
             <ul className="footer__links">
               <li>
                 <a href="tel:+78001234567">8 (800) 123-45-67</a>
@@ -216,7 +215,7 @@ export function Layout() {
         </div>
         <div className="shell footer__bar">
           <span>© {new Date().getFullYear()} АвтоМагазин</span>
-          <span className="footer__muted">Все права защищены</span>
+          <span className="footer__muted">{layoutCopy.footerRights}</span>
         </div>
       </footer>
     </div>

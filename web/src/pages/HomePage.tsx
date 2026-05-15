@@ -4,6 +4,7 @@ import { categories, products, countProductsByCategory } from '../data/catalog'
 import { IconCar } from '../components/icons'
 import { ProductCard } from '../components/ProductCard'
 import { useGarage } from '../context/GarageContext'
+import { homeCopy } from '../content/siteCopy'
 
 const categoryCounts = countProductsByCategory()
 
@@ -20,111 +21,87 @@ export function HomePage() {
   }
 
   return (
-    <main>
-      <section className="store-hero store-hero--tz" aria-labelledby="store-hero-title">
-        <div className="shell store-hero__grid">
-          <div className="store-hero__main">
-            <h1 id="store-hero-title" className="store-hero__title">
-              Запчасти: поиск и каталог
+    <main className="home-pro">
+      <section className="pro-hero" aria-labelledby="pro-hero-title">
+        <div className="shell pro-hero__shell">
+          <div className="pro-hero__content">
+            <h1 id="pro-hero-title" className="pro-hero__title">
+              {homeCopy.heroTitle}
             </h1>
-            <p className="store-hero__lead">
-              Введите номер с наклейки или название детали. Либо откройте раздел ниже — там фильтры по бренду и цене.
-            </p>
-            <form className="store-hero__search" role="search" onSubmit={onHeroSearch}>
+            <p className="pro-hero__lead">{homeCopy.heroLead}</p>
+            <form className="pro-hero__search" role="search" onSubmit={onHeroSearch}>
               <label className="sr-only" htmlFor="hero-q">
-                Поиск запчастей
+                {homeCopy.heroPlaceholder}
               </label>
               <input
                 id="hero-q"
                 name="q"
                 type="search"
-                className="store-hero__search-input"
-                placeholder="Например: колодки или номер с этикетки"
+                className="pro-hero__input"
+                placeholder={homeCopy.heroPlaceholder}
                 autoComplete="off"
               />
-              <button type="submit" className="btn btn--solid store-hero__search-btn">
-                Найти
+              <button type="submit" className="btn btn--solid pro-hero__submit">
+                {homeCopy.heroSubmit}
               </button>
             </form>
-            <div className="store-hero__cta-row">
-              <Link to="/catalog" className="btn btn--outline store-hero__cta">
-                Все разделы каталога
+            <div className="pro-hero__actions">
+              <Link to="/catalog" className="btn btn--solid pro-hero__btn-secondary">
+                {homeCopy.heroCatalog}
               </Link>
-              <Link to="/garage" className="btn btn--outline store-hero__cta">
-                Указать автомобиль
+              <Link to="/garage" className="btn btn--outline pro-hero__btn-secondary">
+                {homeCopy.heroGarage}
               </Link>
             </div>
           </div>
-          <aside className="store-hero__aside" aria-label="Автомобиль">
-            <div className="store-aside-card">
-              <p className="store-aside-card__label">Моё авто</p>
-              <p className="store-aside-card__title">
-                {vehicle ? `${vehicle.brand} ${vehicle.model}, ${vehicle.year}` : 'Не указан'}
-              </p>
-              <p className="store-aside-card__meta">
-                {vehicle
-                  ? vehicle.engine
-                  : 'Укажите марку и модель — в каталоге появится отбор «под ваш авто».'}
-              </p>
-              <div className="store-aside-card__actions">
-                <Link to="/garage" className="btn btn--solid btn--full">
-                  <IconCar />
-                  {vehicle ? 'Изменить' : 'Указать авто'}
-                </Link>
-                {vehicle ? (
-                  <button type="button" className="btn btn--outline btn--full" onClick={() => setVehicle(null)}>
-                    Очистить
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          </aside>
         </div>
       </section>
 
-      <section className="store-trust shell" aria-label="Условия заказа">
-        <div className="store-trust__item">
-          <span className="store-trust__icon" aria-hidden>
-            ✓
+      <section className="pro-garage-bar shell" aria-label={homeCopy.garageLabel}>
+        <div className="pro-garage-bar__text">
+          <span className="pro-garage-bar__label">{homeCopy.garageLabel}</span>
+          <span className="pro-garage-bar__value">
+            {vehicle ? `${vehicle.brand} ${vehicle.model}, ${vehicle.year}` : homeCopy.garageUnsetTitle}
           </span>
-          <div>
-            <p className="store-trust__title">Наличие в карточке</p>
-            <p className="store-trust__text">Под ценой: на складе или под заказ.</p>
-          </div>
+          {!vehicle ? <span className="pro-garage-bar__hint">{homeCopy.garageUnsetMeta}</span> : null}
         </div>
-        <div className="store-trust__item">
-          <span className="store-trust__icon" aria-hidden>
-            ✓
-          </span>
-          <div>
-            <p className="store-trust__title">Доставка и самовывоз</p>
-            <p className="store-trust__text">Подробности — в разделе «Доставка и оплата».</p>
-          </div>
+        <div className="pro-garage-bar__actions">
+          <Link to="/garage" className="btn btn--outline">
+            <IconCar />
+            {vehicle ? homeCopy.garageCtaEdit : homeCopy.garageCtaSet}
+          </Link>
+          {vehicle ? (
+            <button type="button" className="btn btn--ghost" onClick={() => setVehicle(null)}>
+              {homeCopy.garageCtaClear}
+            </button>
+          ) : null}
         </div>
-        <div className="store-trust__item">
-          <span className="store-trust__icon" aria-hidden>
-            ✓
-          </span>
-          <div>
-            <p className="store-trust__title">Возврат</p>
-            <p className="store-trust__text">Правила — в разделе «Возврат» в подвале сайта.</p>
-          </div>
-        </div>
+      </section>
+
+      <section className="pro-pillars shell" aria-label="Преимущества">
+        <ul className="pro-pillars__list">
+          {homeCopy.pillars.map((p) => (
+            <li key={p.title} className="pro-pillars__item">
+              <p className="pro-pillars__title">{p.title}</p>
+              <p className="pro-pillars__text">{p.text}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="section section--tint shell" aria-labelledby="cat-title">
         <div className="section__head">
           <h2 id="cat-title" className="section__title">
-            Разделы каталога
+            {homeCopy.categoriesTitle}
           </h2>
-          <p className="section__subtitle">Выберите тип детали — откроется список с фильтрами слева.</p>
+          <p className="section__subtitle">{homeCopy.categoriesSubtitle}</p>
         </div>
         <div className="cat-grid cat-grid--store">
           {categories.map((c) => (
             <Link key={c.id} className="cat-card cat-card--store" to={`/catalog/${c.id}`}>
               <span className="cat-card__label">{c.label}</span>
               <span className="cat-card__hint">{c.hint}</span>
-              <span className="cat-card__count">{categoryCounts[c.id]} позиций</span>
+              <span className="cat-card__count">{categoryCounts[c.id]} наименований</span>
             </Link>
           ))}
         </div>
@@ -134,12 +111,12 @@ export function HomePage() {
         <div className="section__head section__head--row">
           <div>
             <h2 id="hits-title" className="section__title">
-              Примеры товаров
+              {homeCopy.featuredTitle}
             </h2>
-            <p className="section__subtitle">Цена, наличие и кнопка «В корзину».</p>
+            <p className="section__subtitle">{homeCopy.featuredSubtitle}</p>
           </div>
           <Link className="link-more" to="/catalog">
-            В каталог
+            {homeCopy.featuredLink}
           </Link>
         </div>
         <div className="product-grid product-grid--home">

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { searchProductsExtended } from '../data/catalog'
 import { Breadcrumbs, PageHeader } from '../components/Breadcrumbs'
 import { ProductCard } from '../components/ProductCard'
+import { searchCopy } from '../content/siteCopy'
 
 const POPULAR = [
   { label: 'Номер 34116792227', q: '34116792227' },
@@ -22,19 +23,15 @@ export function SearchPage() {
 
   return (
     <main>
-      <Breadcrumbs items={[{ to: '/', label: 'Главная' }, { label: 'Поиск' }]} />
+      <Breadcrumbs items={[{ to: '/', label: 'Главная' }, { label: searchCopy.breadcrumb }]} />
       <PageHeader
-        title="Поиск"
-        subtitle={
-          q
-            ? `Запрос «${q}». Найдено позиций: ${results.length}.`
-            : 'Введите запрос в строке поиска вверху или выберите пример ниже.'
-        }
+        title={searchCopy.title}
+        subtitle={q ? searchCopy.subtitleWithQuery(q, results.length) : searchCopy.subtitleEmpty}
       />
 
       <div className="shell search-page">
-        <section className="popular-search" aria-label="Частые запросы">
-          <p className="popular-search__label">Частые запросы</p>
+        <section className="popular-search" aria-label={searchCopy.popularLabel}>
+          <p className="popular-search__label">{searchCopy.popularLabel}</p>
           <div className="popular-search__chips">
             {POPULAR.map((item) => (
               <Link key={item.q} className="search-chip" to={`/search?q=${encodeURIComponent(item.q)}`}>
@@ -42,23 +39,21 @@ export function SearchPage() {
               </Link>
             ))}
             <Link className="search-chip search-chip--accent" to="/garage">
-              Моё авто
+              {searchCopy.garageChip}
             </Link>
           </div>
         </section>
 
         {results.length === 0 && q ? (
           <div className="empty-state">
-            <p className="empty-state__title">Ничего не найдено</p>
-            <p className="empty-state__text">
-              Измените запрос или откройте каталог с фильтрами по разделу и бренду.
-            </p>
+            <p className="empty-state__title">{searchCopy.emptyTitle}</p>
+            <p className="empty-state__text">{searchCopy.emptyText}</p>
             <div className="empty-state__actions">
               <Link to="/catalog" className="btn btn--solid">
-                Открыть каталог
+                {searchCopy.toCatalog}
               </Link>
               <Link to="/" className="btn btn--outline">
-                На главную
+                {searchCopy.toHome}
               </Link>
             </div>
           </div>

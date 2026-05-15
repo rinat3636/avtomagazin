@@ -12,6 +12,7 @@ import { productMatchesGarage } from '../data/filters'
 import { Breadcrumbs, PageHeader } from '../components/Breadcrumbs'
 import { ProductCard } from '../components/ProductCard'
 import { useGarage } from '../context/GarageContext'
+import { catalogCopy } from '../content/siteCopy'
 
 const IDS = new Set<CategoryId>(categories.map((c) => c.id))
 const categoryCounts = countProductsByCategory()
@@ -58,7 +59,9 @@ export function CatalogPage() {
     return next
   }, [activeCategory, selectedMfrs, onlyStock, onlyGarage, min, max, sort, vehicle])
 
-  const catLabel = activeCategory ? categories.find((c) => c.id === activeCategory)?.label : 'Все категории'
+  const catLabel = activeCategory
+    ? categories.find((c) => c.id === activeCategory)?.label
+    : catalogCopy.pageTitle
 
   const hasActiveFilters =
     selectedMfrs.length > 0 || onlyStock || onlyGarage || min !== '' || max !== ''
@@ -95,8 +98,8 @@ export function CatalogPage() {
         ]}
       />
       <PageHeader
-        title={catLabel ?? 'Каталог'}
-        subtitle={`Сейчас в списке: ${filtered.length} товаров. Слева можно сузить категорию, бренд, цену и наличие.`}
+        title={catLabel ?? catalogCopy.pageTitle}
+        subtitle={`Отобрано наименований: ${filtered.length}. Для уточнения воспользуйтесь фильтрами.`}
       />
 
       <div
@@ -107,7 +110,7 @@ export function CatalogPage() {
           className="btn btn--outline catalog-filters-open-btn"
           onClick={() => setFiltersOpen(true)}
         >
-          Фильтры и сортировка
+          {catalogCopy.filtersMobile}
         </button>
         {filtersOpen ? (
           <div
@@ -116,12 +119,12 @@ export function CatalogPage() {
             onClick={() => setFiltersOpen(false)}
           />
         ) : null}
-        <aside className="catalog-filters" aria-label="Фильтры">
-          <p className="filters__title">Категория</p>
+        <aside className="catalog-filters" aria-label="Фильтры каталога">
+          <p className="filters__title">{catalogCopy.groupCategory}</p>
           <ul className="filters__list">
             <li>
               <Link to="/catalog" className={!activeCategory ? 'filters__a filters__a--active' : 'filters__a'}>
-                Все <span className="filters__count">({DEMO_CATALOG_TOTAL})</span>
+                {catalogCopy.allItems} <span className="filters__count">({DEMO_CATALOG_TOTAL})</span>
               </Link>
             </li>
             {categories.map((c) => (
@@ -138,9 +141,9 @@ export function CatalogPage() {
           </ul>
 
           <div className="filters__block">
-            <p className="filters__title">Производитель</p>
-            <p className="filters__hint filters__hint--tight">Допускается выбор нескольких производителей.</p>
-            <div className="brand-chips" role="group" aria-label="Бренды">
+            <p className="filters__title">{catalogCopy.brandTitle}</p>
+            <p className="filters__hint filters__hint--tight">{catalogCopy.brandHint}</p>
+            <div className="brand-chips" role="group" aria-label={catalogCopy.brandTitle}>
               {catalogManufacturers.map((name) => (
                 <button
                   key={name}
@@ -155,10 +158,10 @@ export function CatalogPage() {
           </div>
 
           <div className="filters__block">
-            <p className="filters__title">Наличие</p>
+            <p className="filters__title">{catalogCopy.availability}</p>
             <label className="check">
               <input type="checkbox" checked={onlyStock} onChange={(e) => setOnlyStock(e.target.checked)} />
-              <span>Только в наличии</span>
+              <span>{catalogCopy.inStockOnly}</span>
             </label>
             <label className="check">
               <input
@@ -167,25 +170,25 @@ export function CatalogPage() {
                 onChange={(e) => setOnlyGarage(e.target.checked)}
                 disabled={!vehicle}
               />
-              <span>Подходит к авто из гаража</span>
+              <span>{catalogCopy.garageFit}</span>
             </label>
-            {!vehicle ? <p className="filters__hint">Добавьте авто в разделе «Моё авто».</p> : null}
+            {!vehicle ? <p className="filters__hint">{catalogCopy.garageHint}</p> : null}
           </div>
 
           <div className="filters__block">
-            <p className="filters__title">Цена, ₽</p>
+            <p className="filters__title">{catalogCopy.priceTitle}</p>
             <div className="filters__row">
               <input
                 className="field"
                 inputMode="numeric"
-                placeholder="от"
+                placeholder={catalogCopy.priceFrom}
                 value={min}
                 onChange={(e) => setMin(e.target.value.replace(/[^\d]/g, ''))}
               />
               <input
                 className="field"
                 inputMode="numeric"
-                placeholder="до"
+                placeholder={catalogCopy.priceTo}
                 value={max}
                 onChange={(e) => setMax(e.target.value.replace(/[^\d]/g, ''))}
               />
@@ -193,59 +196,57 @@ export function CatalogPage() {
           </div>
 
           <div className="filters__block">
-            <p className="filters__title">Сортировка</p>
+            <p className="filters__title">{catalogCopy.sortTitle}</p>
             <select className="select" value={sort} onChange={(e) => setSort(e.target.value as SortKey)}>
-              <option value="popular">По популярности / наличию</option>
-              <option value="price-asc">Цена: по возрастанию</option>
-              <option value="price-desc">Цена: по убыванию</option>
-              <option value="name-asc">Название А→Я</option>
+              <option value="popular">{catalogCopy.sortPopular}</option>
+              <option value="price-asc">{catalogCopy.sortPriceAsc}</option>
+              <option value="price-desc">{catalogCopy.sortPriceDesc}</option>
+              <option value="name-asc">{catalogCopy.sortName}</option>
             </select>
           </div>
 
           {hasActiveFilters ? (
             <button type="button" className="btn btn--outline btn--full-width" onClick={resetFilters}>
-              Сбросить фильтры
+              {catalogCopy.resetFilters}
             </button>
           ) : null}
           <button type="button" className="btn btn--solid catalog-filters__apply" onClick={() => setFiltersOpen(false)}>
-            Показать товары
+            {catalogCopy.filtersApply}
           </button>
         </aside>
 
         <section className="catalog-results" aria-label="Товары">
           <div className="oem-quick card-form">
-            <p className="oem-quick__title">Поиск по номеру с упаковки</p>
-            <p className="oem-quick__sub">Введите цифры и буквы с наклейки или с этикетки — можно без пробелов.</p>
+            <p className="oem-quick__title">{catalogCopy.quickTitle}</p>
+            <p className="oem-quick__sub">{catalogCopy.quickSub}</p>
             <form className="oem-quick__form" onSubmit={onOemQuick}>
               <input
                 className="field"
-                placeholder="Например 34116792227 или BRK-2048"
+                placeholder={catalogCopy.quickPlaceholder}
                 value={oemQuick}
                 onChange={(e) => setOemQuick(e.target.value)}
-                aria-label="Номер детали или артикул"
+                aria-label={catalogCopy.quickAria}
               />
               <button type="submit" className="btn btn--solid">
-                Искать
+                {catalogCopy.quickSubmit}
               </button>
             </form>
           </div>
 
           {filtered.length === 0 ? (
             <div className="empty-state">
-              <p className="empty-state__title">Ничего не нашлось</p>
+              <p className="empty-state__title">{catalogCopy.emptyTitle}</p>
               <p className="empty-state__text">
-                {hasActiveFilters
-                  ? 'Попробуйте сбросить фильтры или выберите другую категорию слева.'
-                  : 'В этой категории пока нет позиций под выбранные условия.'}
+                {hasActiveFilters ? catalogCopy.emptyFiltered : catalogCopy.emptyCategory}
               </p>
               <div className="empty-state__actions">
                 {hasActiveFilters ? (
                   <button type="button" className="btn btn--solid" onClick={resetFilters}>
-                    Сбросить фильтры
+                    {catalogCopy.resetFilters}
                   </button>
                 ) : null}
                 <Link to="/catalog" className="btn btn--outline">
-                  Все разделы
+                  {catalogCopy.emptyAll}
                 </Link>
               </div>
             </div>
