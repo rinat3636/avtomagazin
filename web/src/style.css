@@ -29,6 +29,7 @@
   --ring-accent: 0 0 0 3px rgba(234, 88, 12, 0.18);
   --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --tracking-tight: -0.025em;
+  --header-logo-h: 40px;
 }
 
 *,
@@ -142,9 +143,8 @@ button {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 20px 0;
+  padding: 14px 0;
   min-width: 0;
-  flex-wrap: wrap;
 }
 
 .brand {
@@ -164,16 +164,17 @@ button {
 }
 
 .brand__logo {
-  height: 200px;
+  height: var(--header-logo-h);
   width: auto;
-  max-width: min(1000px, 90vw);
+  max-width: min(220px, 38vw);
+  max-height: 100%;
   display: block;
   object-fit: contain;
 }
 
 .brand__logo--footer {
-  height: 170px;
-  max-width: min(800px, 95vw);
+  height: 40px;
+  max-width: min(220px, 70vw);
 }
 
 .brand__tag {
@@ -1018,20 +1019,14 @@ button {
 
   .topbar--store .brand,
   .topbar__inner > .brand--on-dark {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
     min-width: 0;
-    overflow: visible;
-    justify-content: center;
+    overflow: hidden;
   }
 
   .topbar--store .brand__logo {
-    height: min(200px, 42vw);
-    max-width: min(1000px, 95vw);
-  }
-
-  .brand__logo--footer {
-    height: min(170px, 38vw);
-    max-width: min(800px, 95vw);
+    height: min(var(--header-logo-h), 36px);
+    max-width: min(180px, 42vw);
   }
 
   .topbar--store .brand__text {
