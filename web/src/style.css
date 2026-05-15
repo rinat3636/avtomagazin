@@ -29,7 +29,7 @@
   --ring-accent: 0 0 0 3px rgba(234, 88, 12, 0.18);
   --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --tracking-tight: -0.025em;
-  --header-logo-h: 40px;
+  --header-logo-h: 48px;
 }
 
 *,
@@ -163,18 +163,33 @@ button {
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
 }
 
-.brand__logo {
+/* Логотип в PNG с чёрным фоном — на тёмной шапке без подложки почти не виден */
+.brand--on-dark {
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 10px;
+  padding: 5px 12px;
+  line-height: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.brand--on-dark .brand__logo {
   height: var(--header-logo-h);
   width: auto;
-  max-width: min(220px, 38vw);
-  max-height: 100%;
+  min-width: 150px;
+  max-width: min(280px, 46vw);
   display: block;
   object-fit: contain;
+  object-position: left center;
 }
 
 .brand__logo--footer {
-  height: 40px;
-  max-width: min(220px, 70vw);
+  height: 52px;
+  width: auto;
+  min-width: 160px;
+  max-width: min(320px, 85vw);
+  display: block;
+  object-fit: contain;
 }
 
 .brand__tag {
@@ -1019,14 +1034,24 @@ button {
 
   .topbar--store .brand,
   .topbar__inner > .brand--on-dark {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
-  .topbar--store .brand__logo {
-    height: min(var(--header-logo-h), 36px);
-    max-width: min(180px, 42vw);
+  .brand--on-dark {
+    padding: 4px 10px;
+  }
+
+  .brand--on-dark .brand__logo {
+    height: 42px;
+    min-width: 120px;
+    max-width: min(240px, 52vw);
+  }
+
+  .brand__logo--footer {
+    height: 44px;
+    min-width: 140px;
   }
 
   .topbar--store .brand__text {
@@ -1047,6 +1072,17 @@ button {
 }
 
 @media (max-width: 560px) {
+  .brand--on-dark .brand__logo {
+    height: 36px;
+    min-width: 100px;
+    max-width: min(200px, 58vw);
+  }
+
+  .brand--on-dark {
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+
   .topbar--store .brand__tag {
     display: none;
   }
