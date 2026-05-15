@@ -142,8 +142,9 @@ button {
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 14px 0;
+  padding: 20px 0;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .brand {
@@ -163,16 +164,16 @@ button {
 }
 
 .brand__logo {
-  height: 40px;
+  height: 200px;
   width: auto;
-  max-width: min(200px, 42vw);
+  max-width: min(1000px, 90vw);
   display: block;
   object-fit: contain;
 }
 
 .brand__logo--footer {
-  height: 34px;
-  max-width: 160px;
+  height: 170px;
+  max-width: min(800px, 95vw);
 }
 
 .brand__tag {
@@ -1017,9 +1018,20 @@ button {
 
   .topbar--store .brand,
   .topbar__inner > .brand--on-dark {
-    flex: 1 1 auto;
+    flex: 1 1 100%;
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
+    justify-content: center;
+  }
+
+  .topbar--store .brand__logo {
+    height: min(200px, 42vw);
+    max-width: min(1000px, 95vw);
+  }
+
+  .brand__logo--footer {
+    height: min(170px, 38vw);
+    max-width: min(800px, 95vw);
   }
 
   .topbar--store .brand__text {
