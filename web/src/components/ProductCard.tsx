@@ -14,8 +14,13 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
 
   return (
     <article className={`product-card${compact ? ' product-card--compact' : ''}`}>
-      <Link to={`/product/${product.slug}`} className="product-card__media" aria-hidden tabIndex={-1}>
-        <span className="product-card__placeholder" />
+      <Link
+        to={`/product/${product.slug}`}
+        className="product-card__media"
+        tabIndex={-1}
+        aria-label={`${product.name} — открыть карточку`}
+      >
+        <span className="product-card__placeholder" aria-hidden />
       </Link>
       <div className="product-card__body">
         <div className="product-card__top">
@@ -36,6 +41,7 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
         <h3 className="product-card__title">
           <Link to={`/product/${product.slug}`}>{product.name}</Link>
         </h3>
+        <p className="product-card__mfr">{product.manufacturer}</p>
         <p className="product-card__sku">
           {product.sku} · OEM {product.oem}
         </p>

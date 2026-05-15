@@ -91,6 +91,21 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="store-stats shell" aria-label="Каталог в цифрах">
+        <div className="store-stats__item">
+          <span className="store-stats__value">{DEMO_CATALOG_TOTAL}+</span>
+          <span className="store-stats__label">наименований в демо-каталоге</span>
+        </div>
+        <div className="store-stats__item">
+          <span className="store-stats__value">OEM / VIN</span>
+          <span className="store-stats__label">поиск по номеру и автомобилю</span>
+        </div>
+        <div className="store-stats__item">
+          <span className="store-stats__value">24–48 ч</span>
+          <span className="store-stats__label">типичная отгрузка со склада</span>
+        </div>
+      </section>
+
       <section className="store-trust shell" aria-label="Условия покупки">
         <div className="store-trust__item">
           <span className="store-trust__icon" aria-hidden>
