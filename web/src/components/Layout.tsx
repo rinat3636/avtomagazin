@@ -1,9 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { IconCar, IconCart, IconClose, IconMenu, IconSearch } from './icons'
 import { useCart } from '../context/CartContext'
 import { useGarage } from '../context/GarageContext'
 import { categories } from '../data/catalog'
+import { syncDocumentTitle } from '../lib/syncDocumentTitle'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'nav__link nav__link--active' : 'nav__link'
@@ -23,6 +24,10 @@ export function Layout() {
     navigate(`/search?q=${encodeURIComponent(query)}`)
     setOpen(false)
   }
+
+  useEffect(() => {
+    syncDocumentTitle(location.pathname)
+  }, [location.pathname])
 
   return (
     <div className="page">

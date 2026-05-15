@@ -29,6 +29,7 @@ export function CatalogPage() {
   const [max, setMax] = useState('')
   const [selectedMfrs, setSelectedMfrs] = useState<string[]>([])
   const [oemQuick, setOemQuick] = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const activeCategory =
     categoryId && IDS.has(categoryId as CategoryId) ? (categoryId as CategoryId) : undefined
@@ -98,7 +99,23 @@ export function CatalogPage() {
         subtitle={`Сейчас в списке: ${filtered.length} товаров. Слева можно сузить категорию, бренд, цену и наличие.`}
       />
 
-      <div className="catalog-layout shell">
+      <div
+        className={`catalog-layout shell${filtersOpen ? ' catalog-layout--filters-open' : ''}`}
+      >
+        <button
+          type="button"
+          className="btn btn--outline catalog-filters-open-btn"
+          onClick={() => setFiltersOpen(true)}
+        >
+          Фильтры и сортировка
+        </button>
+        {filtersOpen ? (
+          <div
+            className="catalog-filters-backdrop"
+            role="presentation"
+            onClick={() => setFiltersOpen(false)}
+          />
+        ) : null}
         <aside className="catalog-filters" aria-label="Фильтры">
           <p className="filters__title">Категория</p>
           <ul className="filters__list">
@@ -190,19 +207,22 @@ export function CatalogPage() {
               Сбросить фильтры
             </button>
           ) : null}
+          <button type="button" className="btn btn--solid catalog-filters__apply" onClick={() => setFiltersOpen(false)}>
+            Показать товары
+          </button>
         </aside>
 
         <section className="catalog-results" aria-label="Товары">
           <div className="oem-quick card-form">
-            <p className="oem-quick__title">Быстрый поиск по OEM / артикулу</p>
-            <p className="oem-quick__sub">Поиск по каталожному и складскому номеру; в запросе допускается запись без пробелов и дефисов.</p>
+            <p className="oem-quick__title">Поиск по номеру с упаковки</p>
+            <p className="oem-quick__sub">Введите цифры и буквы с наклейки или с этикетки — можно без пробелов.</p>
             <form className="oem-quick__form" onSubmit={onOemQuick}>
               <input
                 className="field"
                 placeholder="Например 34116792227 или BRK-2048"
                 value={oemQuick}
                 onChange={(e) => setOemQuick(e.target.value)}
-                aria-label="OEM или артикул"
+                aria-label="Номер детали или артикул"
               />
               <button type="submit" className="btn btn--solid">
                 Искать
@@ -213,10 +233,21 @@ export function CatalogPage() {
           {filtered.length === 0 ? (
             <div className="empty-state">
               <p className="empty-state__title">Ничего не нашлось</p>
-              <p className="empty-state__text">Смягчите фильтры или сбросьте категорию.</p>
-              <Link to="/catalog" className="btn btn--solid">
-                Сбросить категорию
-              </Link>
+              <p className="empty-state__text">
+                {hasActiveFilters
+                  ? 'Попробуйте сбросить фильтры или выберите другую категорию слева.'
+                  : 'В этой категории пока нет позиций под выбранные условия.'}
+              </p>
+              <div className="empty-state__actions">
+                {hasActiveFilters ? (
+                  <button type="button" className="btn btn--solid" onClick={resetFilters}>
+                    Сбросить фильтры
+                  </button>
+                ) : null}
+                <Link to="/catalog" className="btn btn--outline">
+                  Все разделы
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="product-grid product-grid--catalog">

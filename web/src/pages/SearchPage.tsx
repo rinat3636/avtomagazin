@@ -1,18 +1,18 @@
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { DEMO_CATALOG_TOTAL, searchProductsExtended } from '../data/catalog'
+import { searchProductsExtended } from '../data/catalog'
 import { Breadcrumbs, PageHeader } from '../components/Breadcrumbs'
 import { ProductCard } from '../components/ProductCard'
 
 const POPULAR = [
-  { label: 'OEM 34116792227', q: '34116792227' },
-  { label: 'Brembo колодки', q: 'brembo' },
-  { label: 'MANN фильтр', q: 'mann' },
+  { label: 'Номер 34116792227', q: '34116792227' },
+  { label: 'Колодки Brembo', q: 'brembo' },
+  { label: 'Фильтр MANN', q: 'mann' },
   { label: 'Артикул BRK-2048', q: 'BRK-2048' },
   { label: 'Амортизатор Sachs', q: 'sachs' },
-  { label: 'ГРМ комплект', q: 'грм' },
+  { label: 'Комплект ГРМ', q: 'грм' },
   { label: 'Антифриз G12', q: 'g12' },
-  { label: 'ABS датчик', q: 'abs' },
+  { label: 'Датчик ABS', q: 'abs' },
 ] as const
 
 export function SearchPage() {
@@ -24,11 +24,11 @@ export function SearchPage() {
     <main>
       <Breadcrumbs items={[{ to: '/', label: 'Главная' }, { label: 'Поиск' }]} />
       <PageHeader
-        title="Поиск по каталогу"
+        title="Поиск"
         subtitle={
           q
-            ? `Запрос: «${q}». Найдено: ${results.length} из ${DEMO_CATALOG_TOTAL}. Учитываются название, OEM, SKU, бренд.`
-            : `Введите запрос в строке поиска в шапке сайта или выберите пример ниже. В каталоге ${DEMO_CATALOG_TOTAL} наименований.`
+            ? `Запрос «${q}». Найдено позиций: ${results.length}.`
+            : 'Введите запрос в строке поиска вверху или выберите пример ниже.'
         }
       />
 
@@ -42,7 +42,7 @@ export function SearchPage() {
               </Link>
             ))}
             <Link className="search-chip search-chip--accent" to="/garage">
-              Подбор по авто (гараж)
+              Моё авто
             </Link>
           </div>
         </section>
@@ -51,11 +51,16 @@ export function SearchPage() {
           <div className="empty-state">
             <p className="empty-state__title">Ничего не найдено</p>
             <p className="empty-state__text">
-              Попробуйте другой OEM, артикул без пробелов или перейдите в каталог с фильтрами по бренду.
+              Измените запрос или откройте каталог с фильтрами по разделу и бренду.
             </p>
-            <Link to="/catalog" className="btn btn--solid">
-              Открыть каталог
-            </Link>
+            <div className="empty-state__actions">
+              <Link to="/catalog" className="btn btn--solid">
+                Открыть каталог
+              </Link>
+              <Link to="/" className="btn btn--outline">
+                На главную
+              </Link>
+            </div>
           </div>
         ) : results.length > 0 ? (
           <div className="product-grid product-grid--catalog">

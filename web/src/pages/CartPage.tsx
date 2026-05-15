@@ -26,10 +26,15 @@ export function CartPage() {
         {rows.length === 0 ? (
           <div className="empty-state">
             <p className="empty-state__title">Корзина пуста</p>
-            <p className="empty-state__text">Добавьте товары из каталога или с главной страницы.</p>
-            <Link to="/catalog" className="btn btn--solid">
-              В каталог
-            </Link>
+            <p className="empty-state__text">Добавьте товары из каталога или через поиск в шапке.</p>
+            <div className="empty-state__actions">
+              <Link to="/catalog" className="btn btn--solid">
+                В каталог
+              </Link>
+              <Link to="/" className="btn btn--outline">
+                На главную
+              </Link>
+            </div>
           </div>
         ) : (
           <>
@@ -52,7 +57,7 @@ export function CartPage() {
                           {product.name}
                         </Link>
                         <div className="cart-meta">
-                          {product.sku} · OEM {product.oem}
+                          {product.manufacturer} · арт. {product.sku} · № {product.oem}
                         </div>
                       </td>
                       <td>{formatPrice(product.price)}</td>

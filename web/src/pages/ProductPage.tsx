@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getProductBySlug, categories } from '../data/catalog'
 import { formatPrice } from '../lib/format'
@@ -17,6 +17,14 @@ export function ProductPage() {
   const [qty, setQtyInput] = useState(1)
 
   const line = useMemo(() => lines.find((l) => l.productId === product?.id), [lines, product?.id])
+
+  useEffect(() => {
+    if (!product) return
+    document.title = `${product.name} — АвтоМагазин`
+    return () => {
+      document.title = 'АвтоМагазин'
+    }
+  }, [product])
 
   if (!slug || !product) {
     return <Navigate to="/404" replace />
@@ -47,9 +55,9 @@ export function ProductPage() {
         </div>
 
         <div className="product-page__info">
-          <PageHeader title={product.name} subtitle={`${product.manufacturer} · SKU ${product.sku}`} />
+          <PageHeader title={product.name} subtitle={`${product.manufacturer} · артикул ${product.sku}`} />
           <p className="product-page__oem">
-            OEM: <span>{product.oem}</span>
+            Номер на упаковке (каталожный): <span>{product.oem}</span>
           </p>
           <p className="product-page__lead">{product.shortNote}</p>
 
@@ -152,7 +160,7 @@ export function ProductPage() {
                 <td>{product.sku}</td>
               </tr>
               <tr>
-                <th>OEM</th>
+                <th>Номер на упаковке</th>
                 <td>{product.oem}</td>
               </tr>
               <tr>

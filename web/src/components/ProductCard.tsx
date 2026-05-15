@@ -43,7 +43,7 @@ export function ProductCard({ product, compact }: { product: Product; compact?: 
         </h3>
         <p className="product-card__mfr">{product.manufacturer}</p>
         <p className="product-card__sku">
-          {product.sku} · OEM {product.oem}
+          Артикул {product.sku} · № {product.oem}
         </p>
         <p className={`product-card__stock ${product.inStock ? 'product-card__stock--ok' : 'product-card__stock--no'}`}>
           {product.inStock ? `В наличии на складе: ${product.stock} шт.` : 'Нет в наличии — под заказ'}
