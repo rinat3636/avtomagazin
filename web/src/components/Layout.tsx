@@ -73,7 +73,7 @@ export function Layout() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="topbar-search__input"
-              placeholder="OEM, артикул, название детали…"
+              placeholder="Номер детали или название"
               autoComplete="off"
             />
             <button type="submit" className="btn btn--solid topbar-search__btn">
@@ -102,18 +102,19 @@ export function Layout() {
         </div>
       </header>
 
-      <nav className="subnav" aria-label="Разделы каталога">
+      <nav className="subnav" aria-label="Разделы сайта">
         <div className="shell subnav__inner">
-          <NavLink to="/catalog" className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`} end>
-            Все разделы
+          <NavLink
+            to="/catalog"
+            className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}
+          >
+            Каталог
           </NavLink>
-          {categories.map((c) => (
-            <NavLink key={c.id} to={`/catalog/${c.id}`} className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}>
-              {c.label}
-            </NavLink>
-          ))}
-          <NavLink to="/garage" className={({ isActive }) => `subnav__link subnav__link--accent${isActive ? ' subnav__link--active' : ''}`}>
-            Подбор по авто
+          <NavLink
+            to="/garage"
+            className={({ isActive }) => `subnav__link subnav__link--accent${isActive ? ' subnav__link--active' : ''}`}
+          >
+            Моё авто
           </NavLink>
           <NavLink to="/favorites" className={({ isActive }) => `subnav__link${isActive ? ' subnav__link--active' : ''}`}>
             Избранное
@@ -136,30 +137,32 @@ export function Layout() {
             Главная
           </NavLink>
           <NavLink to="/catalog" className={navClass} onClick={() => setOpen(false)}>
-            Каталог
+            Весь каталог
           </NavLink>
+          <NavLink to="/garage" className={navClass} onClick={() => setOpen(false)}>
+            Моё авто
+          </NavLink>
+          <NavLink to="/cart" className={navClass} onClick={() => setOpen(false)}>
+            Корзина
+          </NavLink>
+          <NavLink to="/favorites" className={navClass} onClick={() => setOpen(false)}>
+            Избранное
+          </NavLink>
+          <div className="drawer__group-label">Разделы каталога</div>
           {categories.map((c) => (
             <NavLink key={c.id} to={`/catalog/${c.id}`} className={navClass} onClick={() => setOpen(false)}>
               {c.label}
             </NavLink>
           ))}
-          <NavLink to="/garage" className={navClass} onClick={() => setOpen(false)}>
-            Моё авто
-          </NavLink>
-          <NavLink to="/favorites" className={navClass} onClick={() => setOpen(false)}>
-            Избранное
-          </NavLink>
-          <NavLink to="/cart" className={navClass} onClick={() => setOpen(false)}>
-            Корзина
-          </NavLink>
+          <div className="drawer__group-label">Помощь</div>
           <NavLink to="/delivery" className={navClass} onClick={() => setOpen(false)}>
-            Доставка
-          </NavLink>
-          <NavLink to="/support" className={navClass} onClick={() => setOpen(false)}>
-            Поддержка
+            Доставка и оплата
           </NavLink>
           <NavLink to="/returns" className={navClass} onClick={() => setOpen(false)}>
             Возврат
+          </NavLink>
+          <NavLink to="/support" className={navClass} onClick={() => setOpen(false)}>
+            Поддержка
           </NavLink>
         </nav>
       </aside>
@@ -174,8 +177,7 @@ export function Layout() {
               <span className="brand__text">АвтоМагазин</span>
             </p>
             <p className="footer__muted">
-              Продажа оригинальных и сертифицированных автозапчастей и расходных материалов. Подбор по марке
-              автомобиля, VIN и каталожным номерам. Доставка по региону, самовывоз со склада.
+              Запчасти и расходники. Подбор по автомобилю, доставка и самовывоз.
             </p>
           </div>
           <div>
@@ -185,7 +187,7 @@ export function Layout() {
                 <Link to="/catalog">Каталог</Link>
               </li>
               <li>
-                <Link to="/garage">Подбор по авто</Link>
+                <Link to="/garage">Моё авто</Link>
               </li>
               <li>
                 <Link to="/delivery">Доставка и оплата</Link>

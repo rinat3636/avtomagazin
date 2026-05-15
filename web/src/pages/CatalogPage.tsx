@@ -95,7 +95,7 @@ export function CatalogPage() {
       />
       <PageHeader
         title={catLabel ?? 'Каталог'}
-        subtitle={`В выборке: ${filtered.length} из ${DEMO_CATALOG_TOTAL} наименований. Слева — категории с количеством позиций, фильтр по производителю, диапазон цены, признак наличия на складе и применимость к автомобилю из гаража.`}
+        subtitle={`Сейчас в списке: ${filtered.length} товаров. Слева можно сузить категорию, бренд, цену и наличие.`}
       />
 
       <div className="catalog-layout shell">

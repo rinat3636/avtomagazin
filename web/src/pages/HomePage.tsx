@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   categories,
   products,
-  DEMO_CATALOG_TOTAL,
   countProductsByCategory,
   catalogManufacturers,
 } from '../data/catalog'
@@ -15,7 +14,7 @@ const categoryCounts = countProductsByCategory()
 
 export function HomePage() {
   const navigate = useNavigate()
-  const { vehicle, label, setVehicle } = useGarage()
+  const { vehicle, setVehicle } = useGarage()
 
   const onHeroSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,13 +29,13 @@ export function HomePage() {
       <section className="store-hero" aria-labelledby="store-hero-title">
         <div className="shell store-hero__grid">
           <div className="store-hero__main">
-            <p className="store-hero__kicker">Интернет-магазин автозапчастей</p>
+            <p className="store-hero__kicker">Запчасти для вашего авто</p>
             <h1 id="store-hero-title" className="store-hero__title">
-              Запчасти по OEM, артикулу и каталогу
+              Найдите деталь по номеру или по разделу
             </h1>
             <p className="store-hero__lead">
-              Сначала найдите деталь — по номеру с коробки, по VIN или по автомобилю из гаража. Потом проверьте
-              применимость, наличие на складе и оформите заказ с доставкой или самовывозом.
+              Введите номер с наклейки на детали или напишите, что нужно — покажем подходящие позиции. Категории и
+              фильтры — в каталоге слева после перехода в раздел.
             </p>
             <form className="store-hero__search" role="search" onSubmit={onHeroSearch}>
               <label className="sr-only" htmlFor="hero-q">
@@ -47,73 +46,63 @@ export function HomePage() {
                 name="q"
                 type="search"
                 className="store-hero__search-input"
-                placeholder="Например 34116792227, BRK-2048 или «колодки передние»"
+                placeholder="Например: колодки передние или номер с этикетки"
                 autoComplete="off"
               />
               <button type="submit" className="btn btn--solid store-hero__search-btn">
-                Найти в каталоге
+                Найти
               </button>
             </form>
-            <ul className="store-hero__bullets">
-              <li>Оригинал и проверенные бренды</li>
-              <li>Фильтры по категории и производителю</li>
-              <li>Подбор по марке, году и двигателю</li>
-            </ul>
+            <div className="store-hero__cta-row">
+              <Link to="/catalog" className="btn btn--outline store-hero__cta">
+                Открыть каталог
+              </Link>
+              <Link to="/garage" className="btn btn--outline store-hero__cta">
+                Указать автомобиль
+              </Link>
+            </div>
           </div>
-          <aside className="store-hero__aside" aria-label="Быстрые действия">
+          <aside className="store-hero__aside" aria-label="Ваш автомобиль">
             <div className="store-aside-card">
-              <p className="store-aside-card__label">Моё авто</p>
+              <p className="store-aside-card__label">Автомобиль</p>
               <p className="store-aside-card__title">
-                {vehicle ? `${vehicle.brand} ${vehicle.model}, ${vehicle.year}` : 'Автомобиль не выбран'}
+                {vehicle ? `${vehicle.brand} ${vehicle.model}, ${vehicle.year}` : 'Не выбран'}
               </p>
-              <p className="store-aside-card__meta">{vehicle ? vehicle.engine : label}</p>
+              <p className="store-aside-card__meta">
+                {vehicle ? vehicle.engine : 'Если укажете марку и модель — в каталоге можно отфильтровать «под ваш авто».'}
+              </p>
               <div className="store-aside-card__actions">
                 <Link to="/garage" className="btn btn--solid btn--full">
                   <IconCar />
-                  {vehicle ? 'Изменить или VIN' : 'Добавить автомобиль'}
+                  {vehicle ? 'Изменить' : 'Выбрать авто'}
                 </Link>
                 {vehicle ? (
                   <button type="button" className="btn btn--outline btn--full" onClick={() => setVehicle(null)}>
-                    Сбросить авто
+                    Очистить
                   </button>
                 ) : null}
               </div>
             </div>
             <div className="store-aside-card store-aside-card--muted">
-              <p className="store-aside-card__label">Консультация</p>
-              <p className="store-aside-card__title">Подбор по каталогу</p>
-              <p className="store-aside-card__meta">Если не уверены в артикуле — оставьте заявку в поддержке.</p>
+              <p className="store-aside-card__label">Вопрос по подбору</p>
+              <p className="store-aside-card__title">Напишите в поддержку</p>
+              <p className="store-aside-card__meta">Поможем с артикулом и применимостью.</p>
               <Link to="/support" className="btn btn--outline btn--full">
-                Связаться
+                Написать
               </Link>
             </div>
           </aside>
         </div>
       </section>
 
-      <section className="store-stats shell" aria-label="Каталог в цифрах">
-        <div className="store-stats__item">
-          <span className="store-stats__value">{DEMO_CATALOG_TOTAL}+</span>
-          <span className="store-stats__label">наименований в демо-каталоге</span>
-        </div>
-        <div className="store-stats__item">
-          <span className="store-stats__value">OEM / VIN</span>
-          <span className="store-stats__label">поиск по номеру и автомобилю</span>
-        </div>
-        <div className="store-stats__item">
-          <span className="store-stats__value">24–48 ч</span>
-          <span className="store-stats__label">типичная отгрузка со склада</span>
-        </div>
-      </section>
-
-      <section className="store-trust shell" aria-label="Условия покупки">
+      <section className="store-trust shell" aria-label="Коротко о заказе">
         <div className="store-trust__item">
           <span className="store-trust__icon" aria-hidden>
             ✓
           </span>
           <div>
-            <p className="store-trust__title">Наличие на складе</p>
-            <p className="store-trust__text">Позиции с отметкой «в наличии» отгружаем в день заказа при оформлении до отсечки.</p>
+            <p className="store-trust__title">Наличие в карточке товара</p>
+            <p className="store-trust__text">Смотрите под ценой: есть на складе или под заказ.</p>
           </div>
         </div>
         <div className="store-trust__item">
@@ -121,8 +110,8 @@ export function HomePage() {
             ✓
           </span>
           <div>
-            <p className="store-trust__title">Самовывоз и доставка</p>
-            <p className="store-trust__text">Курьер, транспортные компании и пункт выдачи — согласуем после подтверждения заказа.</p>
+            <p className="store-trust__title">Доставка или самовывоз</p>
+            <p className="store-trust__text">Способ уточним после оформления заказа.</p>
           </div>
         </div>
         <div className="store-trust__item">
@@ -130,43 +119,8 @@ export function HomePage() {
             ✓
           </span>
           <div>
-            <p className="store-trust__title">Возврат по регламенту</p>
-            <p className="store-trust__text">Неустановленные детали и брак — оформляем возврат согласно разделу «Возврат».</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="section shell" aria-labelledby="paths-title">
-        <div className="section__head">
-          <h2 id="paths-title" className="section__title">
-            Как купить
-          </h2>
-          <p className="section__subtitle">Три типичных сценария — выберите удобный.</p>
-        </div>
-        <div className="store-path-grid">
-          <div className="store-path-card">
-            <p className="store-path-card__step">1</p>
-            <h3 className="store-path-card__title">Уже знаете номер</h3>
-            <p className="store-path-card__text">Введите OEM или наш складской артикул в поиске вверху страницы или в каталоге.</p>
-            <Link to="/catalog" className="btn btn--solid">
-              Открыть каталог
-            </Link>
-          </div>
-          <div className="store-path-card">
-            <p className="store-path-card__step">2</p>
-            <h3 className="store-path-card__title">Подбираете по автомобилю</h3>
-            <p className="store-path-card__text">Сохраните комплектацию в «Моё авто» — в каталоге появится фильтр «подходит к авто».</p>
-            <Link to="/garage" className="btn btn--outline">
-              Заполнить гараж
-            </Link>
-          </div>
-          <div className="store-path-card store-path-card--accent">
-            <p className="store-path-card__step">3</p>
-            <h3 className="store-path-card__title">Смотрите по разделам</h3>
-            <p className="store-path-card__text">Тормоза, фильтры, подвеска и др. — каждый раздел со своими фильтрами и сортировкой.</p>
-            <Link to="/catalog" className="btn btn--ghost-on-dark">
-              Все категории
-            </Link>
+            <p className="store-trust__title">Возврат по правилам магазина</p>
+            <p className="store-trust__text">Условия — в разделе «Возврат» внизу страницы.</p>
           </div>
         </div>
       </section>
@@ -174,10 +128,10 @@ export function HomePage() {
       <section className="section section--tint shell" aria-labelledby="cat-title">
         <div className="section__head">
           <h2 id="cat-title" className="section__title">
-            Разделы каталога
+            Каталог по разделам
           </h2>
           <p className="section__subtitle">
-            В базе {DEMO_CATALOG_TOTAL} наименований. Зайдите в раздел — слева фильтры по бренду, цене и наличию.
+            Выберите раздел — откроется список товаров с фильтрами слева (бренд, цена, наличие).
           </p>
         </div>
         <div className="cat-grid cat-grid--store">
@@ -194,9 +148,9 @@ export function HomePage() {
       <section className="section shell" aria-labelledby="brands-title">
         <div className="section__head">
           <h2 id="brands-title" className="section__title">
-            Бренды в каталоге
+            Поиск по бренду
           </h2>
-          <p className="section__subtitle">Быстрый переход в поиск по названию производителя.</p>
+          <p className="section__subtitle">Нажмите название — откроется поиск по этому производителю.</p>
         </div>
         <div className="store-brand-row" role="list">
           {catalogManufacturers.map((name) => (
@@ -211,12 +165,12 @@ export function HomePage() {
         <div className="section__head section__head--row">
           <div>
             <h2 id="hits-title" className="section__title">
-              Рекомендуем к покупке
+              Примеры из каталога
             </h2>
-            <p className="section__subtitle">Позиции со складским остатком и понятной маркировкой по применимости.</p>
+            <p className="section__subtitle">Так выглядят карточки: цена, наличие, кнопка в корзину.</p>
           </div>
           <Link className="link-more" to="/catalog">
-            Весь каталог
+            Все товары
           </Link>
         </div>
         <div className="product-grid product-grid--home">
@@ -228,28 +182,28 @@ export function HomePage() {
 
       <section className="section shell" aria-labelledby="svc-title">
         <h2 id="svc-title" className="sr-only">
-          Сервис покупателю
+          Доставка и оплата
         </h2>
         <div className="store-service-grid">
           <div className="store-service-card">
             <h3 className="store-service-card__title">Доставка</h3>
-            <p className="store-service-card__text">Сроки и тарифы согласуем после сборки заказа — в корзине можно оставить комментарий к доставке.</p>
+            <p className="store-service-card__text">Курьер, ТК или самовывоз — обсудим после заказа.</p>
             <Link to="/delivery" className="store-service-card__link">
-              Условия доставки →
+              Подробнее →
             </Link>
           </div>
           <div className="store-service-card">
             <h3 className="store-service-card__title">Оплата</h3>
-            <p className="store-service-card__text">Способы оплаты доступны на этапе оформления. По запросу — счёт для юрлица.</p>
+            <p className="store-service-card__text">Варианты оплаты — на шаге оформления. Юрлицам — по счёту.</p>
             <Link to="/delivery" className="store-service-card__link">
-              Способы оплаты →
+              Подробнее →
             </Link>
           </div>
           <div className="store-service-card">
-            <h3 className="store-service-card__title">Возврат и гарантия</h3>
-            <p className="store-service-card__text">Неустановленная деталь и заводской брак — оформляем по регламенту магазина.</p>
+            <h3 className="store-service-card__title">Возврат</h3>
+            <p className="store-service-card__text">Если деталь не подошла или брак — по регламенту.</p>
             <Link to="/returns" className="store-service-card__link">
-              Регламент возврата →
+              Подробнее →
             </Link>
           </div>
         </div>
