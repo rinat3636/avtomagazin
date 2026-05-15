@@ -62,9 +62,7 @@ export function Layout() {
           </button>
 
           <Link to="/" className="brand brand--on-dark">
-            <span className="brand__mark" aria-hidden />
-            <span className="brand__text">АвтоМагазин</span>
-            <span className="brand__tag">{layoutCopy.brandTag}</span>
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Авто Династия" className="brand__logo" />
           </Link>
 
           <form className="topbar-search topbar-search--store" role="search" onSubmit={onSearch}>
@@ -179,8 +177,7 @@ export function Layout() {
         <div className="shell footer__grid">
           <div>
             <p className="brand brand--footer">
-              <span className="brand__mark" aria-hidden />
-              <span className="brand__text">АвтоМагазин</span>
+              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Авто Династия" className="brand__logo brand__logo--footer" />
             </p>
             <p className="footer__muted">{layoutCopy.footerLead}</p>
           </div>
