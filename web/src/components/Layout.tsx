@@ -6,6 +6,7 @@ import { useGarage } from '../context/GarageContext'
 import { categories } from '../data/catalog'
 import { layoutCopy } from '../content/siteCopy'
 import { syncDocumentTitle } from '../lib/syncDocumentTitle'
+import brandLogo from '../assets/brand-logo.png'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'nav__link nav__link--active' : 'nav__link'
@@ -62,7 +63,7 @@ export function Layout() {
           </button>
 
           <Link to="/" className="brand brand--on-dark">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Авто Династия" className="brand__logo" />
+            <img src={brandLogo} alt="Авто Династия" className="brand__logo" width={160} height={56} />
           </Link>
 
           <form className="topbar-search topbar-search--store" role="search" onSubmit={onSearch}>
@@ -177,7 +178,7 @@ export function Layout() {
         <div className="shell footer__grid">
           <div>
             <p className="brand brand--footer">
-              <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Авто Династия" className="brand__logo brand__logo--footer" />
+              <img src={brandLogo} alt="Авто Династия" className="brand__logo brand__logo--footer" width={120} height={34} />
             </p>
             <p className="footer__muted">{layoutCopy.footerLead}</p>
           </div>

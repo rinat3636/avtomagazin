@@ -57,6 +57,7 @@ jobs:
           git add -A assets/
           if [ -f favicon.svg ]; then git add -f favicon.svg; fi
           if [ -f icons.svg ]; then git add -f icons.svg; fi
+          if [ -f logo.png ]; then git add -f logo.png; fi
           if git diff --staged --quiet; then
             echo "нет изменений статики — пропускаем коммит в main"
           else

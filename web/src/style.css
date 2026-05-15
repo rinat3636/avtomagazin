@@ -163,14 +163,16 @@ button {
 }
 
 .brand__logo {
-  height: 56px;
+  height: 40px;
   width: auto;
+  max-width: min(200px, 42vw);
   display: block;
+  object-fit: contain;
 }
 
 .brand__logo--footer {
   height: 34px;
-  filter: brightness(0.75);
+  max-width: 160px;
 }
 
 .brand__tag {
